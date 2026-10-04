@@ -1,0 +1,1301 @@
+You are the lead software architect, senior full-stack engineer, ML engineer, data engineer, DevOps engineer, and Agentic AI engineer responsible for building the complete production-ready application:
+
+# AI INVENTORY DECISION AGENT
+
+This is an Agentic AI inventory intelligence platform for Indian supermarkets, mini-supermarkets, organized retail stores, and wholesalers.
+
+IMPORTANT:
+Do not treat this as a simple dashboard project or a chatbot project.
+
+Build the complete end-to-end application described in the project documentation, including:
+- frontend
+- backend
+- database
+- data ingestion
+- data cleaning
+- ML pipelines
+- forecasting
+- stockout prediction
+- overstock detection
+- fast/slow moving analysis
+- Indian festival intelligence
+- supplier intelligence
+- reorder optimization
+- LLM agent
+- tool calling
+- human approval workflow
+- purchase-order generation
+- GST module
+- optional bill scanner
+- analytics
+- authentication/RBAC
+- audit logging
+- testing
+- Docker
+- deployment configuration
+- observability
+- production hardening
+
+============================================================
+1. FIRST READ THE PROJECT DOCUMENTATION
+============================================================
+
+Before writing or modifying application code, read these files completely:
+
+1. `PRD.md`
+2. `MVP Tech Doc.md`
+3. `system Design.md`
+4. `Architecture.md`
+
+Treat these documents as the primary specification.
+
+Do NOT ignore their requirements.
+
+Do NOT replace their architecture with a simpler architecture unless a technical limitation makes it necessary.
+
+Do NOT start by creating a visually impressive frontend while leaving the backend/ML/agent logic fake.
+
+The application must be implemented from the specifications.
+
+After reading the files:
+
+1. extract all functional requirements
+2. extract all technical requirements
+3. extract all database entities
+4. extract all APIs
+5. extract all ML requirements
+6. extract all agent tools
+7. extract all security requirements
+8. extract all production requirements
+9. create an implementation checklist
+10. map every requirement to source code/modules/tests
+
+Create or update:
+
+`docs/IMPLEMENTATION_STATUS.md`
+
+with:
+
+- requirement
+- source document
+- implementation location
+- status
+- test status
+- remaining work
+
+============================================================
+2. CORE PRODUCT PRINCIPLE
+============================================================
+
+The product is an intelligence layer over existing retail/POS systems.
+
+Do NOT build a POS replacement.
+
+The architecture must follow:
+
+Retail Data
+    ↓
+Data Ingestion
+    ↓
+Validation / Cleaning
+    ↓
+Canonical Database
+    ↓
+Feature Engineering
+    ↓
+ML / Forecasting
+    ↓
+Inventory Decision Engine
+    ↓
+LLM Agent
+    ↓
+Explainable Recommendation
+    ↓
+Human Approval
+    ↓
+Purchase Order
+
+The most important architectural rule is:
+
+NUMBERS MUST COME FROM DATA, ML MODELS, SQL, OR DETERMINISTIC BUSINESS LOGIC.
+
+The LLM must not invent:
+
+- sales
+- inventory
+- forecast numbers
+- supplier lead time
+- MOQ
+- prices
+- GST values
+- reorder quantity
+
+The LLM is responsible for:
+
+- reasoning
+- planning
+- tool selection
+- tool orchestration
+- summarization
+- explanations
+- natural-language interaction
+- workflow coordination
+
+Do not use the LLM as a replacement for SQL, Python calculations, or forecasting models.
+
+============================================================
+3. BUILD THE APPLICATION END TO END
+============================================================
+
+Build a complete monorepo.
+
+Recommended structure:
+
+ai-inventory-agent/
+│
+├── apps/
+│   ├── web/
+│   └── api/
+│
+├── agent/
+│   ├── prompts/
+│   ├── tools/
+│   ├── schemas/
+│   ├── policies/
+│   └── memory/
+│
+├── ml/
+│   ├── datasets/
+│   ├── preprocessing/
+│   ├── features/
+│   ├── training/
+│   ├── evaluation/
+│   ├── inference/
+│   └── artifacts/
+│
+├── services/
+│   ├── ingestion/
+│   ├── forecasting/
+│   ├── inventory/
+│   ├── procurement/
+│   ├── suppliers/
+│   ├── festival/
+│   ├── gst/
+│   └── document_processing/
+│
+├── data/
+│   ├── raw/
+│   ├── processed/
+│   ├── synthetic/
+│   ├── manifests/
+│   └── quarantine/
+│
+├── db/
+│   ├── migrations/
+│   └── seed/
+│
+├── scripts/
+│   ├── download_datasets.py
+│   ├── generate_prototype_data.py
+│   ├── validate_datasets.py
+│   └── seed_demo.py
+│
+├── tests/
+│   ├── unit/
+│   ├── integration/
+│   ├── ml/
+│   ├── agent/
+│   └── e2e/
+│
+├── infra/
+├── docs/
+├── docker-compose.yml
+├── .env.example
+└── README.md
+
+You may improve this structure where technically justified, but preserve clear separation between:
+
+frontend
+API
+domain services
+agent
+ML
+database
+infrastructure
+
+============================================================
+4. DATASET ACQUISITION
+============================================================
+
+The project must prioritize INDIA-BASED datasets.
+
+Do not substitute foreign retail datasets such as Walmart M5, Favorita, Rossmann, etc. for the Indian core benchmark.
+
+We already have/plan to use Indian datasets.
+
+For every dataset:
+
+1. try terminal/CLI acquisition first
+2. verify that the files actually exist
+3. inspect schema
+4. validate whether the data is usable
+5. record source/provenance
+6. if acquisition fails, automatically create a synthetic equivalent
+
+Never let dataset download failure block application development.
+
+============================================================
+5. REMAINING DATASETS THAT MUST BE ACQUIRED
+============================================================
+
+The following three datasets were not reliably downloadable by the project owner previously.
+
+You MUST attempt to acquire them from terminal.
+
+------------------------------------------------------------
+DATASET 4 — INDIAN SUPERSTORE SALES
+------------------------------------------------------------
+
+Purpose:
+
+Use this as a secondary Indian retail validation dataset for:
+
+- sales trends
+- product performance
+- regional analysis
+- category analysis
+- basic forecasting validation
+
+Repository:
+
+Kashb-shielah/superstore-sales-analysis
+
+Preferred terminal method:
+
+```bash
+gh repo clone Kashb-shielah/superstore-sales-analysis data/raw/indian-superstore
+
+Then inspect:
+find data/raw/indian-superstore -maxdepth 2 -type f
+
+The repository contains:
+superstore-sales-analysis.xlsx
+The repository describes the dataset as 12 months of Indian retail superstore transactions across Clothing, Electronics, and Furniture.
+Do NOT automatically assume it is suitable for long-term time-series forecasting.
+Use it primarily for secondary validation and business analytics.
+If GitHub CLI is unavailable:
+1. check whether gh can be installed
+2. otherwise attempt the repository through another terminal-accessible Git method
+3. if acquisition still fails, DO NOT block development
+Instead create the fallback dataset:
+data/synthetic/indian_superstore_prototype.csv
+Generate it through:
+scripts/generate_prototype_data.py
+Mark:
+synthetic_flag = true
+DATASET 5 — SUPPLYSTREAM
+Purpose:
+This dataset is for the supply-chain/inventory side of the system.
+Use it for:
+- supplier lead time
+- inventory
+- reorder points
+- supplier reliability
+- replenishment
+- logistics
+- purchase simulation
+- inventory model development
+Repository:
+MMathew4788/SupplyStream-Analytics-for-Retail-Logistics
+Preferred terminal method:
+gh repo clone MMathew4788/SupplyStream-Analytics-for-Retail-Logistics data/raw/supplystream
+
+Then:
+cd data/raw/supplystream
+python -m pip install numpy pandas faker
+python generate_data.py
+cd ../../..
+
+Inspect:
+find data/raw/supplystream -maxdepth 2 -type f
+
+The repository contains a Python generator and SupplyChain_Data outputs.
+Use its generated data to understand:
+- supplier behavior
+- lead-time variability
+- reorder points
+- stores
+- logistics
+- replenishment
+Keep provenance clear because this dataset is synthetic.
+If the repository cannot be acquired or the generator cannot execute:
+DO NOT stop.
+Create a local implementation:
+scripts/generate_supply_chain_data.py
+Generate realistic Indian retail supply-chain prototype data with:
+- 20+ suppliers
+- products
+- stores
+- supplier-product mapping
+- supplier reliability
+- lead time
+- MOQ
+- unit cost
+- reorder point
+- safety stock
+- inventory snapshots
+- purchase orders
+- fulfillment status
+Use deterministic randomness.
+Default:
+seed = 42
+
+DATASET 6 — WHYLOGS INDIAN GROCERY ECOMMERCE
+Purpose:
+Use this mainly for:
+- Indian grocery product intelligence
+- product classification
+- category intelligence
+- product description understanding
+- price/rating features
+- LLM product understanding
+It is NOT the primary demand forecasting dataset.
+Install:
+python -m pip install "whylogs[datasets]"
+
+Load:
+python - <<'PY'
+from whylogs.datasets import Ecommerce
+
+dataset = Ecommerce(version="base")
+
+print(dataset.describe())
+print(dataset.get_baseline().data.head())
+PY
+
+The Whylogs Ecommerce dataset documentation says it contains transaction/product information for a grocery supermarket in India and includes fields such as product description, category, market price and user rating.
+It is derived from the BigBasket product dataset.
+If the package cannot download/load the dataset:
+DO NOT block development.
+Generate:
+data/synthetic/bigbasket_prototype.csv
+using:
+scripts/generate_prototype_data.py
+Generate realistic fields including:
+- product
+- category
+- subcategory
+- brand
+- market_price
+- selling_price
+- rating
+- description
+- historical_sales_signal
+Mark it as synthetic.
+IMPORTANT:
+Do not claim generated data is real BigBasket data.
+============================================================
+6. DATASET FALLBACK ENGINE
+============================================================
+Create:
+scripts/download_datasets.py
+This script should attempt all configured downloads.
+Then create:
+scripts/validate_datasets.py
+which checks:
+- file existence
+- schema
+- row count
+- duplicate records
+- missing key columns
+- date formats
+- numerical validity
+When a dataset is unavailable:
+call the appropriate synthetic generator.
+Create:
+scripts/generate_prototype_data.py
+This must generate a complete end-to-end prototype dataset.
+It must allow:
+python scripts/generate_prototype_data.py --seed 42
+
+The generated environment must contain enough data to run the entire application offline.
+============================================================
+7. DATA MODEL
+============================================================
+Implement PostgreSQL with migrations.
+Core entities:
+- tenants
+- users
+- roles
+- stores
+- products
+- suppliers
+- supplier_products
+- sales
+- inventory_snapshots
+- purchases
+- purchase_order_lines
+- festivals
+- forecasts
+- recommendations
+- recommendation_evidence
+- approvals
+- invoices
+- invoice_lines
+- gst_transactions
+- audit_events
+- model_versions
+- data_sources
+- data_quality_runs
+Every business-owned table must be tenant-aware in production.
+Use:
+tenant_id
+
+where required.
+Add:
+- foreign keys
+- unique constraints
+- indexes
+- check constraints
+- timestamps
+- soft-delete strategy where appropriate
+============================================================
+8. DATA INGESTION
+============================================================
+Support:
+- CSV
+- XLSX
+- API-ready ingestion layer
+Implement:
+POST /api/v1/data/import
+The pipeline:
+file
+ ↓
+file validation
+ ↓
+schema detection
+ ↓
+mapping
+ ↓
+normalization
+ ↓
+deduplication
+ ↓
+data-quality checks
+ ↓
+canonical tables
+Bad records go to quarantine.
+Do not silently discard bad data.
+Provide data quality reports.
+============================================================
+9. MACHINE LEARNING
+============================================================
+Implement actual models.
+Do not create fake predict() functions that return hardcoded values.
+MODEL 1 — DEMAND FORECASTING
+Start with:
+1. naive baseline
+2. Scikit-learn baseline
+3. gradient-boosted model
+Use time-aware validation.
+Features:
+- lag 1
+- lag 3
+- lag 7
+- lag 14
+- lag 28
+- rolling 7-day mean
+- rolling 14-day mean
+- rolling 28-day mean
+- rolling standard deviation
+- weekday
+- month
+- week-of-year
+- promotion/discount
+- price
+- store
+- category
+- subcategory
+- holiday
+- festival
+- stock availability
+Primary target:
+future_demand_7d
+Then support:
+14-day
+30-day
+Evaluation:
+- MAE
+- RMSE
+- WAPE/SMAPE as appropriate
+Always compare against a naive baseline.
+Never claim improved model performance without actual evaluation results.
+MODEL 2 — STOCKOUT RISK
+Implement deterministic stock coverage first.
+Calculate:
+lead_time_demand
+safety_stock
+required_stock
+days_of_inventory
+
+Then implement a stockout probability model where suitable training labels exist.
+Output:
+SAFE
+WATCH
+HIGH
+CRITICAL
+
+and numerical probability where supported.
+MODEL 3 — MOVEMENT
+Implement:
+- fast moving
+- normal moving
+- slow moving
+Also implement optional ABC-XYZ segmentation.
+MODEL 4 — FESTIVAL DEMAND
+Create an India-specific festival table.
+Support:
+- Diwali
+- Holi
+- Eid
+- Raksha Bandhan
+- Navratri
+- Dussehra
+- Christmas
+- Pongal
+- Onam
+- Independence Day
+- Republic Day
+- region-specific festivals
+DO NOT hardcode fake demand uplifts.
+Calculate festival impact from:
+historical event-period demand
++
+matched baseline
++
+current trend
++
+promotion
++
+regional relevance
+Return:
+- uplift
+- forecast
+- confidence
+- evidence
+- sample size
+If historical evidence is insufficient:
+return low confidence.
+============================================================
+10. REORDER ENGINE
+============================================================
+Implement deterministic inventory optimization.
+Core idea:
+lead_time_demand
++
+safety_stock
++
+festival_buffer
+-
+available_stock
+-
+on_order_stock
+=
+reorder_need
+
+Then apply:
+- MOQ
+- pack size
+- supplier availability
+- budget where configured
+Do not allow the LLM to override these hard constraints.
+============================================================
+11. LLM AGENT
+============================================================
+Implement a real tool-calling agent.
+Suggested tools:
+get_sales_summary
+get_inventory_snapshot
+forecast_demand
+get_stockout_risk
+get_overstock_risk
+get_movement_classification
+analyze_festival_impact
+get_supplier_constraints
+calculate_reorder_quantity
+get_product_details
+create_purchase_order_draft
+validate_purchase_order
+
+The LLM must call tools instead of querying the database directly.
+Example:
+User:
+"What should I order before Diwali?"
+Agent:
+1. analyze intent
+2. get current inventory
+3. forecast relevant products
+4. analyze festival impact
+5. check supplier constraints
+6. calculate reorder
+7. explain recommendation
+8. ask manager for approval
+Do not pass hundreds of thousands of raw rows to the LLM.
+Aggregate using SQL/Pandas/services first.
+Send the LLM structured facts.
+============================================================
+12. HUMAN-IN-THE-LOOP
+============================================================
+This is mandatory.
+Every financially significant recommendation must support:
+Approve
+Modify
+Reject
+
+State machine:
+DRAFT
+↓
+PENDING_REVIEW
+├── REJECTED
+├── MODIFIED → PENDING_REVIEW
+└── APPROVED
+       ↓
+PO_GENERATED
+
+A PO cannot be generated from an unapproved recommendation.
+Store:
+- original AI quantity
+- manager quantity
+- manager
+- timestamp
+- comment
+- original reasoning
+- final action
+============================================================
+13. PURCHASE ORDERS
+============================================================
+Implement supplier-wise PO generation.
+PO must contain:
+- PO number
+- supplier
+- supplier GSTIN if available
+- store
+- SKU
+- product
+- quantity
+- unit price
+- taxable subtotal
+- CGST/SGST/IGST where applicable
+- total
+- approval reference
+- generated timestamp
+PO creation must be transactional and idempotent.
+============================================================
+14. GST
+============================================================
+Implement GST as a supporting module.
+Store:
+- GSTIN
+- GST rate
+- taxable value
+- CGST
+- SGST
+- IGST
+Calculations must be deterministic.
+Do not position the application as professional tax filing software.
+============================================================
+15. AI BILL SCANNER
+============================================================
+Implement as an optional feature.
+Pipeline:
+upload
+ ↓
+file validation
+ ↓
+OCR/vision
+ ↓
+structured extraction
+ ↓
+confidence check
+ ↓
+human verification
+ ↓
+database update
+Never silently write low-confidence OCR results into financial records.
+============================================================
+16. FRONTEND
+============================================================
+Build a polished production-grade React application.
+Do not build a generic admin template.
+Pages:
+1. Login
+2. Main Dashboard
+3. Inventory
+4. Product detail
+5. Forecasting
+6. Inventory Risks
+7. AI Recommendations
+8. Agent Chat
+9. Festivals
+10. Suppliers
+11. Purchase Orders
+12. Sales Analytics
+13. GST
+14. Bill Scanner
+15. Audit Logs
+16. Model/AI Health
+17. Settings
+Dashboard should prominently show:
+- total sales
+- stockout risks
+- overstock risks
+- fast movers
+- slow movers
+- pending approvals
+- upcoming festival impact
+- reorder value
+============================================================
+17. AGENT CHAT UI
+============================================================
+The chat experience should support queries like:
+"What products are at risk of stocking out?"
+"What should I reorder today?"
+"What will Diwali change?"
+"Why are you recommending 250 units?"
+"Show me the products where demand is increasing."
+"Group recommended purchases by supplier."
+"Create a PO for approved recommendations."
+The UI must show supporting evidence.
+Avoid presenting the agent as an uncontrolled autonomous purchasing bot.
+============================================================
+18. AUTHENTICATION + RBAC
+============================================================
+Implement roles:
+ADMIN
+OWNER
+MANAGER
+PROCUREMENT
+FINANCE
+ANALYST
+Protect APIs using authorization checks.
+Examples:
+Only authorized managers/procurement users can approve recommendations.
+Only authorized users can generate POs.
+Only admins can modify critical system configuration.
+============================================================
+19. AUDIT LOGGING
+============================================================
+Every important action must be auditable.
+Record:
+- user
+- tenant
+- timestamp
+- action
+- resource
+- before/after values
+- request ID
+- source
+- reason/comment
+Audit:
+- imports
+- recommendation creation
+- approval
+- modification
+- rejection
+- PO generation
+- supplier changes
+- model deployment
+- configuration changes
+============================================================
+20. SECURITY
+============================================================
+Implement:
+- secure authentication
+- RBAC
+- environment secrets
+- input validation
+- rate limiting
+- secure uploads
+- CORS policy
+- SQL injection protection
+- tenant isolation
+- audit logs
+- dependency scanning
+Protect LLM tools against:
+- prompt injection
+- tool abuse
+- unauthorized actions
+- cross-tenant leakage
+- data exfiltration
+Never put secrets in source code.
+Create:
+.env.example
+============================================================
+21. OBSERVABILITY
+============================================================
+Implement structured logging.
+Track:
+- request latency
+- API failures
+- agent calls
+- tool failures
+- forecast failures
+- OCR failures
+- recommendation counts
+- approval counts
+- PO failures
+- data quality failures
+ML monitoring:
+- MAE
+- WAPE/SMAPE
+- prediction drift
+- feature drift
+- model version
+Agent monitoring:
+- tool-call success
+- invalid tool arguments
+- unsupported claim rate
+- latency
+- policy violations
+============================================================
+22. BACKGROUND JOBS
+============================================================
+Use Redis plus worker architecture.
+Background jobs:
+- data imports
+- data validation
+- feature generation
+- forecast refresh
+- stockout scan
+- overstock scan
+- festival scan
+- recommendation refresh
+- OCR
+- report generation
+- data-quality checks
+Do not make expensive ML/OCR tasks block HTTP requests.
+============================================================
+23. API DESIGN
+============================================================
+Implement API versioning.
+At minimum:
+POST /api/v1/data/import
+POST /api/v1/data/validate
+
+GET  /api/v1/sales/summary
+GET  /api/v1/inventory
+GET  /api/v1/inventory/risks
+
+POST /api/v1/forecast
+GET  /api/v1/products/{id}/forecast
+
+GET  /api/v1/festivals/upcoming
+POST /api/v1/festival/analyze
+
+GET  /api/v1/recommendations
+POST /api/v1/recommendations/{id}/approve
+POST /api/v1/recommendations/{id}/modify
+POST /api/v1/recommendations/{id}/reject
+
+GET  /api/v1/purchase-orders
+POST /api/v1/purchase-orders
+
+POST /api/v1/bills/scan
+GET  /api/v1/gst/reports
+
+Use Pydantic schemas.
+Never expose internal database models directly as uncontrolled API responses.
+============================================================
+24. DATABASE / MIGRATIONS
+============================================================
+Use migrations.
+Use:
+- PostgreSQL
+- UUID identifiers where appropriate
+- timestamps
+- indexes
+- foreign keys
+- constraints
+Do not use SQLite for production.
+SQLite may be used only for tiny isolated tests if absolutely necessary.
+============================================================
+25. TESTING
+============================================================
+Do not consider the application complete without tests.
+Implement:
+Unit tests
+- reorder calculation
+- safety stock
+- lead-time demand
+- MOQ rounding
+- GST calculation
+- festival calculations
+- risk classification
+ML tests
+- feature schema
+- leakage checks
+- baseline comparison
+- model output schema
+- model artifact load
+Agent tests
+- tool selection
+- malformed tool arguments
+- hallucination resistance
+- approval enforcement
+- missing data
+- invalid supplier
+- PO safety
+Integration tests
+Test:
+import
+→ database
+→ forecasting
+→ recommendation
+→ approval
+→ PO
+
+E2E test
+Run:
+Indian retail data
+→ inventory state
+→ festival event
+→ elevated demand
+→ stockout risk
+→ recommendation
+→ manager modifies quantity
+→ PO generated
+
+============================================================
+26. DOCKER
+============================================================
+Create Dockerfiles for:
+- frontend
+- backend
+- worker
+Create:
+docker-compose.yml
+with:
+- PostgreSQL
+- Redis
+- API
+- worker
+- frontend
+The entire application should be startable using documented commands.
+Example:
+docker compose up --build
+
+============================================================
+27. PRODUCTION CONFIGURATION
+============================================================
+Support separate environments:
+development
+staging
+production
+
+Do not hardcode:
+- database URLs
+- API keys
+- LLM API keys
+- encryption keys
+- JWT secrets
+- storage credentials
+All must come from environment configuration.
+============================================================
+28. MODEL VERSIONING
+============================================================
+Every forecast must identify:
+- model version
+- training dataset
+- feature version
+- timestamp
+- validation metrics
+Store model metadata.
+Enable rollback to a previous model.
+============================================================
+29. DATA PROVENANCE
+============================================================
+For every dataset track:
+source
+dataset_name
+source_file
+download_time
+ingestion_run
+version
+synthetic_flag
+
+The UI/docs must distinguish:
+REAL_PUBLIC_DATA
+SYNTHETIC_DATA
+USER_UPLOADED_DATA
+CONNECTED_POS_DATA
+Never present synthetic prototype data as actual supermarket observations.
+============================================================
+30. FALLBACK / OFFLINE MODE
+============================================================
+The application must remain runnable even without external datasets.
+The following command must work:
+python scripts/generate_prototype_data.py --seed 42
+
+Then:
+python scripts/seed_demo.py
+
+The application must become usable with generated data.
+Generate realistic:
+- Indian products
+- Indian states/cities
+- categories
+- sales
+- stores
+- inventory
+- suppliers
+- lead times
+- MOQ
+- purchase orders
+- festivals
+- GST records
+Use Indian Rupees.
+============================================================
+31. PRODUCT EXPERIENCE
+============================================================
+The application should feel like an actual commercial product.
+Do not use:
+- random placeholder cards
+- fake AI responses
+- static mock recommendation numbers
+- fake charts
+- hardcoded dashboard metrics
+All displayed business metrics must come from the database.
+If there is no data yet:
+show an explicit empty state and provide:
+"Load Demo Data"
+which executes/seeds the synthetic dataset.
+============================================================
+32. DEMO MODE
+============================================================
+Create a deterministic demo scenario.
+Example:
+Product:
+Milk 500ml
+Current stock:
+80
+Average daily sales:
+~65
+Lead time:
+2 days
+MOQ:
+100
+Upcoming event:
+Diwali
+The system should calculate a realistic recommendation using the actual models/business logic.
+Do not hardcode "250" just because the example exists in documentation.
+============================================================
+33. AGENT DEMONSTRATION SCENARIOS
+============================================================
+Support at least these demos:
+Scenario 1:
+"What should I reorder today?"
+Scenario 2:
+"Which items are likely to stock out?"
+Scenario 3:
+"What will Diwali change?"
+Scenario 4:
+"Why are these products high risk?"
+Scenario 5:
+"Show me slow-moving inventory."
+Scenario 6:
+"Group all recommended orders by supplier."
+Scenario 7:
+"Prepare purchase orders for the approved recommendations."
+The last action must enforce approval.
+============================================================
+34. PERFORMANCE
+============================================================
+Keep expensive operations asynchronous.
+Optimize database queries.
+Add indexes after measuring actual query patterns.
+Cache repeated dashboard queries where helpful.
+Do not send raw millions-row datasets to the frontend or LLM.
+============================================================
+35. DOCUMENTATION
+============================================================
+Update/create:
+README.md
+docs/IMPLEMENTATION_STATUS.md
+docs/DATASET_SETUP.md
+docs/API.md
+docs/DEPLOYMENT.md
+docs/ML.md
+docs/AGENT.md
+docs/SECURITY.md
+docs/TROUBLESHOOTING.md
+README must include:
+- architecture
+- setup
+- local development
+- dataset setup
+- CLI commands
+- prototype data generation
+- environment variables
+- database migration
+- tests
+- Docker
+- deployment
+============================================================
+36. DATASET DOCUMENTATION
+============================================================
+Create:
+docs/DATASET_SETUP.md
+For each dataset document:
+- purpose
+- acquisition method
+- terminal command
+- file location
+- expected schema
+- validation
+- project usage
+- fallback generator
+- provenance classification
+Explicitly document:
+Indian Superstore:
+secondary validation
+SupplyStream:
+supplier/inventory/logistics simulation
+Whylogs Ecommerce:
+Indian grocery/product intelligence
+============================================================
+37. DO NOT OVERFIT THE ARCHITECTURE TO THE HACKATHON
+============================================================
+This is a production-oriented application.
+Implement the MVP quickly, but structure it so that it can later support:
+- multiple stores
+- multiple businesses
+- ERP integrations
+- POS APIs
+- real supplier APIs
+- model retraining
+- model monitoring
+- larger datasets
+- enterprise RBAC
+- cloud deployment
+============================================================
+38. IMPLEMENTATION PROCESS
+============================================================
+Follow this order.
+PHASE 1
+Read all four technical documents.
+PHASE 2
+Inspect repository.
+PHASE 3
+Acquire datasets via terminal.
+PHASE 4
+Create fallback synthetic-data generation.
+PHASE 5
+Set up PostgreSQL and migrations.
+PHASE 6
+Build canonical data models.
+PHASE 7
+Build ingestion pipeline.
+PHASE 8
+Build feature engineering.
+PHASE 9
+Build baseline forecasting.
+PHASE 10
+Build stockout/overstock/movement intelligence.
+PHASE 11
+Build festival intelligence.
+PHASE 12
+Build reorder optimizer.
+PHASE 13
+Build supplier intelligence.
+PHASE 14
+Build LLM tool layer.
+PHASE 15
+Build agent orchestration.
+PHASE 16
+Build approval workflow.
+PHASE 17
+Build PO generation.
+PHASE 18
+Build frontend.
+PHASE 19
+Build OCR/GST modules.
+PHASE 20
+Add authentication/RBAC/audit.
+PHASE 21
+Write tests.
+PHASE 22
+Dockerize.
+PHASE 23
+Run full integration/E2E test.
+PHASE 24
+Fix all critical issues.
+PHASE 25
+Update documentation.
+Do not skip foundational phases merely to produce screenshots.
+============================================================
+39. DEFINITION OF DONE
+============================================================
+Do not say the project is complete because the UI loads.
+The project is complete only when:
+[ ] frontend works
+[ ] backend works
+[ ] PostgreSQL works
+[ ] migrations work
+[ ] datasets can be loaded
+[ ] offline synthetic dataset generation works
+[ ] ingestion works
+[ ] data validation works
+[ ] forecast model trains
+[ ] forecast model evaluates
+[ ] forecast inference works
+[ ] stockout risk works
+[ ] overstock detection works
+[ ] fast/slow analysis works
+[ ] festival intelligence works
+[ ] reorder engine works
+[ ] supplier constraints work
+[ ] LLM agent works
+[ ] tools work
+[ ] agent cannot bypass approval
+[ ] recommendations work
+[ ] approval workflow works
+[ ] purchase orders work
+[ ] GST works
+[ ] bill scanning works or is cleanly isolated as optional
+[ ] analytics work
+[ ] authentication works
+[ ] RBAC works
+[ ] audit logs work
+[ ] background jobs work
+[ ] tests pass
+[ ] Docker works
+[ ] README works
+[ ] deployment documentation works
+[ ] no secrets are committed
+[ ] no critical TODOs remain
+============================================================
+40. FINAL RULE
+============================================================
+Build this as a real product.
+Do not create fake AI.
+Do not hardcode business results.
+Do not fabricate dataset statistics.
+Do not let dataset download issues stop development.
+Do not let the LLM directly manipulate financial/inventory records.
+Do not bypass human approval.
+Do not send huge raw datasets to the LLM.
+Do not claim synthetic data is real.
+Use the supplied project documents as the specification.
+When something cannot be obtained externally, implement a transparent synthetic fallback and continue.
+When something is ambiguous, prefer the architecture and requirements defined in:
+- PRD.md
+- MVP Tech Doc.md
+- system Design.md
+- Architecture.md
+The final result must be a complete, locally runnable, testable, Dockerized, production-oriented AI Inventory Decision Agent with an actual ML layer and an actual tool-using LLM agent.
+
+A couple of important implementation details are now verified against the current sources: the Indian Superstore repository contains `superstore-sales-analysis.xlsx` and describes its 12-month Indian retail dataset; SupplyStream currently includes `generate_data.py` and documents the `pip install` → `git clone` → `python generate_data.py` workflow; and Whylogs' Ecommerce dataset is explicitly described as grocery-supermarket data from India, derived from BigBasket, with the `whylogs[datasets]` + `Ecommerce(version="base")` loading pattern. :chatgpt-content-reference{index="0"}
+
+**One important change from the earlier plan:** I would have the agent **validate each dataset before using it for model training**. For example, the Indian Retail Sales Analytics repository itself notes that all customer/product IDs are unique and flags other data-quality oddities, so it should be treated as a secondary benchmark/validation source rather than blindly treated as realistic repeat-purchase POS data. :chatgpt-content-reference{index="1"}
+
+This prompt is designed to be pasted **after placing the four `.md` files in the project's root directory**.

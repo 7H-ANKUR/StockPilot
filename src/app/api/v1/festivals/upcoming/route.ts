@@ -1,0 +1,17 @@
+import { NextResponse } from 'next/server';
+import { db } from '@/lib/db';
+
+export async function GET() {
+  const today = new Date();
+  const next90 = new Date();
+  next90.setDate(next90.getDate() + 90);
+  
+  const festivals = await db.festival.findMany({
+    where: {
+      startDate: { gte: today, lte: next90 },
+    },
+    orderBy: { startDate: 'asc' },
+  });
+  
+  return NextResponse.json({ festivals });
+}

@@ -1,0 +1,1301 @@
+     1→     1→You are the lead software architect, senior full-stack engineer, ML engineer, data engineer, DevOps engineer, and Agentic AI engineer responsible for building the complete production-ready application:
+     2→     2→
+     3→     3→# AI INVENTORY DECISION AGENT
+     4→     4→
+     5→     5→This is an Agentic AI inventory intelligence platform for Indian supermarkets, mini-supermarkets, organized retail stores, and wholesalers.
+     6→     6→
+     7→     7→IMPORTANT:
+     8→     8→Do not treat this as a simple dashboard project or a chatbot project.
+     9→     9→
+    10→    10→Build the complete end-to-end application described in the project documentation, including:
+    11→    11→- frontend
+    12→    12→- backend
+    13→    13→- database
+    14→    14→- data ingestion
+    15→    15→- data cleaning
+    16→    16→- ML pipelines
+    17→    17→- forecasting
+    18→    18→- stockout prediction
+    19→    19→- overstock detection
+    20→    20→- fast/slow moving analysis
+    21→    21→- Indian festival intelligence
+    22→    22→- supplier intelligence
+    23→    23→- reorder optimization
+    24→    24→- LLM agent
+    25→    25→- tool calling
+    26→    26→- human approval workflow
+    27→    27→- purchase-order generation
+    28→    28→- GST module
+    29→    29→- optional bill scanner
+    30→    30→- analytics
+    31→    31→- authentication/RBAC
+    32→    32→- audit logging
+    33→    33→- testing
+    34→    34→- Docker
+    35→    35→- deployment configuration
+    36→    36→- observability
+    37→    37→- production hardening
+    38→    38→
+    39→    39→============================================================
+    40→    40→1. FIRST READ THE PROJECT DOCUMENTATION
+    41→    41→============================================================
+    42→    42→
+    43→    43→Before writing or modifying application code, read these files completely:
+    44→    44→
+    45→    45→1. `PRD.md`
+    46→    46→2. `MVP Tech Doc.md`
+    47→    47→3. `system Design.md`
+    48→    48→4. `Architecture.md`
+    49→    49→
+    50→    50→Treat these documents as the primary specification.
+    51→    51→
+    52→    52→Do NOT ignore their requirements.
+    53→    53→
+    54→    54→Do NOT replace their architecture with a simpler architecture unless a technical limitation makes it necessary.
+    55→    55→
+    56→    56→Do NOT start by creating a visually impressive frontend while leaving the backend/ML/agent logic fake.
+    57→    57→
+    58→    58→The application must be implemented from the specifications.
+    59→    59→
+    60→    60→After reading the files:
+    61→    61→
+    62→    62→1. extract all functional requirements
+    63→    63→2. extract all technical requirements
+    64→    64→3. extract all database entities
+    65→    65→4. extract all APIs
+    66→    66→5. extract all ML requirements
+    67→    67→6. extract all agent tools
+    68→    68→7. extract all security requirements
+    69→    69→8. extract all production requirements
+    70→    70→9. create an implementation checklist
+    71→    71→10. map every requirement to source code/modules/tests
+    72→    72→
+    73→    73→Create or update:
+    74→    74→
+    75→    75→`docs/IMPLEMENTATION_STATUS.md`
+    76→    76→
+    77→    77→with:
+    78→    78→
+    79→    79→- requirement
+    80→    80→- source document
+    81→    81→- implementation location
+    82→    82→- status
+    83→    83→- test status
+    84→    84→- remaining work
+    85→    85→
+    86→    86→============================================================
+    87→    87→2. CORE PRODUCT PRINCIPLE
+    88→    88→============================================================
+    89→    89→
+    90→    90→The product is an intelligence layer over existing retail/POS systems.
+    91→    91→
+    92→    92→Do NOT build a POS replacement.
+    93→    93→
+    94→    94→The architecture must follow:
+    95→    95→
+    96→    96→Retail Data
+    97→    97→    ↓
+    98→    98→Data Ingestion
+    99→    99→    ↓
+   100→   100→Validation / Cleaning
+   101→   101→    ↓
+   102→   102→Canonical Database
+   103→   103→    ↓
+   104→   104→Feature Engineering
+   105→   105→    ↓
+   106→   106→ML / Forecasting
+   107→   107→    ↓
+   108→   108→Inventory Decision Engine
+   109→   109→    ↓
+   110→   110→LLM Agent
+   111→   111→    ↓
+   112→   112→Explainable Recommendation
+   113→   113→    ↓
+   114→   114→Human Approval
+   115→   115→    ↓
+   116→   116→Purchase Order
+   117→   117→
+   118→   118→The most important architectural rule is:
+   119→   119→
+   120→   120→NUMBERS MUST COME FROM DATA, ML MODELS, SQL, OR DETERMINISTIC BUSINESS LOGIC.
+   121→   121→
+   122→   122→The LLM must not invent:
+   123→   123→
+   124→   124→- sales
+   125→   125→- inventory
+   126→   126→- forecast numbers
+   127→   127→- supplier lead time
+   128→   128→- MOQ
+   129→   129→- prices
+   130→   130→- GST values
+   131→   131→- reorder quantity
+   132→   132→
+   133→   133→The LLM is responsible for:
+   134→   134→
+   135→   135→- reasoning
+   136→   136→- planning
+   137→   137→- tool selection
+   138→   138→- tool orchestration
+   139→   139→- summarization
+   140→   140→- explanations
+   141→   141→- natural-language interaction
+   142→   142→- workflow coordination
+   143→   143→
+   144→   144→Do not use the LLM as a replacement for SQL, Python calculations, or forecasting models.
+   145→   145→
+   146→   146→============================================================
+   147→   147→3. BUILD THE APPLICATION END TO END
+   148→   148→============================================================
+   149→   149→
+   150→   150→Build a complete monorepo.
+   151→   151→
+   152→   152→Recommended structure:
+   153→   153→
+   154→   154→ai-inventory-agent/
+   155→   155→│
+   156→   156→├── apps/
+   157→   157→│   ├── web/
+   158→   158→│   └── api/
+   159→   159→│
+   160→   160→├── agent/
+   161→   161→│   ├── prompts/
+   162→   162→│   ├── tools/
+   163→   163→│   ├── schemas/
+   164→   164→│   ├── policies/
+   165→   165→│   └── memory/
+   166→   166→│
+   167→   167→├── ml/
+   168→   168→│   ├── datasets/
+   169→   169→│   ├── preprocessing/
+   170→   170→│   ├── features/
+   171→   171→│   ├── training/
+   172→   172→│   ├── evaluation/
+   173→   173→│   ├── inference/
+   174→   174→│   └── artifacts/
+   175→   175→│
+   176→   176→├── services/
+   177→   177→│   ├── ingestion/
+   178→   178→│   ├── forecasting/
+   179→   179→│   ├── inventory/
+   180→   180→│   ├── procurement/
+   181→   181→│   ├── suppliers/
+   182→   182→│   ├── festival/
+   183→   183→│   ├── gst/
+   184→   184→│   └── document_processing/
+   185→   185→│
+   186→   186→├── data/
+   187→   187→│   ├── raw/
+   188→   188→│   ├── processed/
+   189→   189→│   ├── synthetic/
+   190→   190→│   ├── manifests/
+   191→   191→│   └── quarantine/
+   192→   192→│
+   193→   193→├── db/
+   194→   194→│   ├── migrations/
+   195→   195→│   └── seed/
+   196→   196→│
+   197→   197→├── scripts/
+   198→   198→│   ├── download_datasets.py
+   199→   199→│   ├── generate_prototype_data.py
+   200→   200→│   ├── validate_datasets.py
+   201→   201→│   └── seed_demo.py
+   202→   202→│
+   203→   203→├── tests/
+   204→   204→│   ├── unit/
+   205→   205→│   ├── integration/
+   206→   206→│   ├── ml/
+   207→   207→│   ├── agent/
+   208→   208→│   └── e2e/
+   209→   209→│
+   210→   210→├── infra/
+   211→   211→├── docs/
+   212→   212→├── docker-compose.yml
+   213→   213→├── .env.example
+   214→   214→└── README.md
+   215→   215→
+   216→   216→You may improve this structure where technically justified, but preserve clear separation between:
+   217→   217→
+   218→   218→frontend
+   219→   219→API
+   220→   220→domain services
+   221→   221→agent
+   222→   222→ML
+   223→   223→database
+   224→   224→infrastructure
+   225→   225→
+   226→   226→============================================================
+   227→   227→4. DATASET ACQUISITION
+   228→   228→============================================================
+   229→   229→
+   230→   230→The project must prioritize INDIA-BASED datasets.
+   231→   231→
+   232→   232→Do not substitute foreign retail datasets such as Walmart M5, Favorita, Rossmann, etc. for the Indian core benchmark.
+   233→   233→
+   234→   234→We already have/plan to use Indian datasets.
+   235→   235→
+   236→   236→For every dataset:
+   237→   237→
+   238→   238→1. try terminal/CLI acquisition first
+   239→   239→2. verify that the files actually exist
+   240→   240→3. inspect schema
+   241→   241→4. validate whether the data is usable
+   242→   242→5. record source/provenance
+   243→   243→6. if acquisition fails, automatically create a synthetic equivalent
+   244→   244→
+   245→   245→Never let dataset download failure block application development.
+   246→   246→
+   247→   247→============================================================
+   248→   248→5. REMAINING DATASETS THAT MUST BE ACQUIRED
+   249→   249→============================================================
+   250→   250→
+   251→   251→The following three datasets were not reliably downloadable by the project owner previously.
+   252→   252→
+   253→   253→You MUST attempt to acquire them from terminal.
+   254→   254→
+   255→   255→------------------------------------------------------------
+   256→   256→DATASET 4 — INDIAN SUPERSTORE SALES
+   257→   257→------------------------------------------------------------
+   258→   258→
+   259→   259→Purpose:
+   260→   260→
+   261→   261→Use this as a secondary Indian retail validation dataset for:
+   262→   262→
+   263→   263→- sales trends
+   264→   264→- product performance
+   265→   265→- regional analysis
+   266→   266→- category analysis
+   267→   267→- basic forecasting validation
+   268→   268→
+   269→   269→Repository:
+   270→   270→
+   271→   271→Kashb-shielah/superstore-sales-analysis
+   272→   272→
+   273→   273→Preferred terminal method:
+   274→   274→
+   275→   275→```bash
+   276→   276→gh repo clone Kashb-shielah/superstore-sales-analysis data/raw/indian-superstore
+   277→   277→
+   278→   278→Then inspect:
+   279→   279→find data/raw/indian-superstore -maxdepth 2 -type f
+   280→   280→
+   281→   281→The repository contains:
+   282→   282→superstore-sales-analysis.xlsx
+   283→   283→The repository describes the dataset as 12 months of Indian retail superstore transactions across Clothing, Electronics, and Furniture.
+   284→   284→Do NOT automatically assume it is suitable for long-term time-series forecasting.
+   285→   285→Use it primarily for secondary validation and business analytics.
+   286→   286→If GitHub CLI is unavailable:
+   287→   287→1. check whether gh can be installed
+   288→   288→2. otherwise attempt the repository through another terminal-accessible Git method
+   289→   289→3. if acquisition still fails, DO NOT block development
+   290→   290→Instead create the fallback dataset:
+   291→   291→data/synthetic/indian_superstore_prototype.csv
+   292→   292→Generate it through:
+   293→   293→scripts/generate_prototype_data.py
+   294→   294→Mark:
+   295→   295→synthetic_flag = true
+   296→   296→DATASET 5 — SUPPLYSTREAM
+   297→   297→Purpose:
+   298→   298→This dataset is for the supply-chain/inventory side of the system.
+   299→   299→Use it for:
+   300→   300→- supplier lead time
+   301→   301→- inventory
+   302→   302→- reorder points
+   303→   303→- supplier reliability
+   304→   304→- replenishment
+   305→   305→- logistics
+   306→   306→- purchase simulation
+   307→   307→- inventory model development
+   308→   308→Repository:
+   309→   309→MMathew4788/SupplyStream-Analytics-for-Retail-Logistics
+   310→   310→Preferred terminal method:
+   311→   311→gh repo clone MMathew4788/SupplyStream-Analytics-for-Retail-Logistics data/raw/supplystream
+   312→   312→
+   313→   313→Then:
+   314→   314→cd data/raw/supplystream
+   315→   315→python -m pip install numpy pandas faker
+   316→   316→python generate_data.py
+   317→   317→cd ../../..
+   318→   318→
+   319→   319→Inspect:
+   320→   320→find data/raw/supplystream -maxdepth 2 -type f
+   321→   321→
+   322→   322→The repository contains a Python generator and SupplyChain_Data outputs.
+   323→   323→Use its generated data to understand:
+   324→   324→- supplier behavior
+   325→   325→- lead-time variability
+   326→   326→- reorder points
+   327→   327→- stores
+   328→   328→- logistics
+   329→   329→- replenishment
+   330→   330→Keep provenance clear because this dataset is synthetic.
+   331→   331→If the repository cannot be acquired or the generator cannot execute:
+   332→   332→DO NOT stop.
+   333→   333→Create a local implementation:
+   334→   334→scripts/generate_supply_chain_data.py
+   335→   335→Generate realistic Indian retail supply-chain prototype data with:
+   336→   336→- 20+ suppliers
+   337→   337→- products
+   338→   338→- stores
+   339→   339→- supplier-product mapping
+   340→   340→- supplier reliability
+   341→   341→- lead time
+   342→   342→- MOQ
+   343→   343→- unit cost
+   344→   344→- reorder point
+   345→   345→- safety stock
+   346→   346→- inventory snapshots
+   347→   347→- purchase orders
+   348→   348→- fulfillment status
+   349→   349→Use deterministic randomness.
+   350→   350→Default:
+   351→   351→seed = 42
+   352→   352→
+   353→   353→DATASET 6 — WHYLOGS INDIAN GROCERY ECOMMERCE
+   354→   354→Purpose:
+   355→   355→Use this mainly for:
+   356→   356→- Indian grocery product intelligence
+   357→   357→- product classification
+   358→   358→- category intelligence
+   359→   359→- product description understanding
+   360→   360→- price/rating features
+   361→   361→- LLM product understanding
+   362→   362→It is NOT the primary demand forecasting dataset.
+   363→   363→Install:
+   364→   364→python -m pip install "whylogs[datasets]"
+   365→   365→
+   366→   366→Load:
+   367→   367→python - <<'PY'
+   368→   368→from whylogs.datasets import Ecommerce
+   369→   369→
+   370→   370→dataset = Ecommerce(version="base")
+   371→   371→
+   372→   372→print(dataset.describe())
+   373→   373→print(dataset.get_baseline().data.head())
+   374→   374→PY
+   375→   375→
+   376→   376→The Whylogs Ecommerce dataset documentation says it contains transaction/product information for a grocery supermarket in India and includes fields such as product description, category, market price and user rating.
+   377→   377→It is derived from the BigBasket product dataset.
+   378→   378→If the package cannot download/load the dataset:
+   379→   379→DO NOT block development.
+   380→   380→Generate:
+   381→   381→data/synthetic/bigbasket_prototype.csv
+   382→   382→using:
+   383→   383→scripts/generate_prototype_data.py
+   384→   384→Generate realistic fields including:
+   385→   385→- product
+   386→   386→- category
+   387→   387→- subcategory
+   388→   388→- brand
+   389→   389→- market_price
+   390→   390→- selling_price
+   391→   391→- rating
+   392→   392→- description
+   393→   393→- historical_sales_signal
+   394→   394→Mark it as synthetic.
+   395→   395→IMPORTANT:
+   396→   396→Do not claim generated data is real BigBasket data.
+   397→   397→============================================================
+   398→   398→6. DATASET FALLBACK ENGINE
+   399→   399→============================================================
+   400→   400→Create:
+   401→   401→scripts/download_datasets.py
+   402→   402→This script should attempt all configured downloads.
+   403→   403→Then create:
+   404→   404→scripts/validate_datasets.py
+   405→   405→which checks:
+   406→   406→- file existence
+   407→   407→- schema
+   408→   408→- row count
+   409→   409→- duplicate records
+   410→   410→- missing key columns
+   411→   411→- date formats
+   412→   412→- numerical validity
+   413→   413→When a dataset is unavailable:
+   414→   414→call the appropriate synthetic generator.
+   415→   415→Create:
+   416→   416→scripts/generate_prototype_data.py
+   417→   417→This must generate a complete end-to-end prototype dataset.
+   418→   418→It must allow:
+   419→   419→python scripts/generate_prototype_data.py --seed 42
+   420→   420→
+   421→   421→The generated environment must contain enough data to run the entire application offline.
+   422→   422→============================================================
+   423→   423→7. DATA MODEL
+   424→   424→============================================================
+   425→   425→Implement PostgreSQL with migrations.
+   426→   426→Core entities:
+   427→   427→- tenants
+   428→   428→- users
+   429→   429→- roles
+   430→   430→- stores
+   431→   431→- products
+   432→   432→- suppliers
+   433→   433→- supplier_products
+   434→   434→- sales
+   435→   435→- inventory_snapshots
+   436→   436→- purchases
+   437→   437→- purchase_order_lines
+   438→   438→- festivals
+   439→   439→- forecasts
+   440→   440→- recommendations
+   441→   441→- recommendation_evidence
+   442→   442→- approvals
+   443→   443→- invoices
+   444→   444→- invoice_lines
+   445→   445→- gst_transactions
+   446→   446→- audit_events
+   447→   447→- model_versions
+   448→   448→- data_sources
+   449→   449→- data_quality_runs
+   450→   450→Every business-owned table must be tenant-aware in production.
+   451→   451→Use:
+   452→   452→tenant_id
+   453→   453→
+   454→   454→where required.
+   455→   455→Add:
+   456→   456→- foreign keys
+   457→   457→- unique constraints
+   458→   458→- indexes
+   459→   459→- check constraints
+   460→   460→- timestamps
+   461→   461→- soft-delete strategy where appropriate
+   462→   462→============================================================
+   463→   463→8. DATA INGESTION
+   464→   464→============================================================
+   465→   465→Support:
+   466→   466→- CSV
+   467→   467→- XLSX
+   468→   468→- API-ready ingestion layer
+   469→   469→Implement:
+   470→   470→POST /api/v1/data/import
+   471→   471→The pipeline:
+   472→   472→file
+   473→   473→ ↓
+   474→   474→file validation
+   475→   475→ ↓
+   476→   476→schema detection
+   477→   477→ ↓
+   478→   478→mapping
+   479→   479→ ↓
+   480→   480→normalization
+   481→   481→ ↓
+   482→   482→deduplication
+   483→   483→ ↓
+   484→   484→data-quality checks
+   485→   485→ ↓
+   486→   486→canonical tables
+   487→   487→Bad records go to quarantine.
+   488→   488→Do not silently discard bad data.
+   489→   489→Provide data quality reports.
+   490→   490→============================================================
+   491→   491→9. MACHINE LEARNING
+   492→   492→============================================================
+   493→   493→Implement actual models.
+   494→   494→Do not create fake predict() functions that return hardcoded values.
+   495→   495→MODEL 1 — DEMAND FORECASTING
+   496→   496→Start with:
+   497→   497→1. naive baseline
+   498→   498→2. Scikit-learn baseline
+   499→   499→3. gradient-boosted model
+   500→   500→Use time-aware validation.
+   501→   501→Features:
+   502→   502→- lag 1
+   503→   503→- lag 3
+   504→   504→- lag 7
+   505→   505→- lag 14
+   506→   506→- lag 28
+   507→   507→- rolling 7-day mean
+   508→   508→- rolling 14-day mean
+   509→   509→- rolling 28-day mean
+   510→   510→- rolling standard deviation
+   511→   511→- weekday
+   512→   512→- month
+   513→   513→- week-of-year
+   514→   514→- promotion/discount
+   515→   515→- price
+   516→   516→- store
+   517→   517→- category
+   518→   518→- subcategory
+   519→   519→- holiday
+   520→   520→- festival
+   521→   521→- stock availability
+   522→   522→Primary target:
+   523→   523→future_demand_7d
+   524→   524→Then support:
+   525→   525→14-day
+   526→   526→30-day
+   527→   527→Evaluation:
+   528→   528→- MAE
+   529→   529→- RMSE
+   530→   530→- WAPE/SMAPE as appropriate
+   531→   531→Always compare against a naive baseline.
+   532→   532→Never claim improved model performance without actual evaluation results.
+   533→   533→MODEL 2 — STOCKOUT RISK
+   534→   534→Implement deterministic stock coverage first.
+   535→   535→Calculate:
+   536→   536→lead_time_demand
+   537→   537→safety_stock
+   538→   538→required_stock
+   539→   539→days_of_inventory
+   540→   540→
+   541→   541→Then implement a stockout probability model where suitable training labels exist.
+   542→   542→Output:
+   543→   543→SAFE
+   544→   544→WATCH
+   545→   545→HIGH
+   546→   546→CRITICAL
+   547→   547→
+   548→   548→and numerical probability where supported.
+   549→   549→MODEL 3 — MOVEMENT
+   550→   550→Implement:
+   551→   551→- fast moving
+   552→   552→- normal moving
+   553→   553→- slow moving
+   554→   554→Also implement optional ABC-XYZ segmentation.
+   555→   555→MODEL 4 — FESTIVAL DEMAND
+   556→   556→Create an India-specific festival table.
+   557→   557→Support:
+   558→   558→- Diwali
+   559→   559→- Holi
+   560→   560→- Eid
+   561→   561→- Raksha Bandhan
+   562→   562→- Navratri
+   563→   563→- Dussehra
+   564→   564→- Christmas
+   565→   565→- Pongal
+   566→   566→- Onam
+   567→   567→- Independence Day
+   568→   568→- Republic Day
+   569→   569→- region-specific festivals
+   570→   570→DO NOT hardcode fake demand uplifts.
+   571→   571→Calculate festival impact from:
+   572→   572→historical event-period demand
+   573→   573→+
+   574→   574→matched baseline
+   575→   575→+
+   576→   576→current trend
+   577→   577→+
+   578→   578→promotion
+   579→   579→+
+   580→   580→regional relevance
+   581→   581→Return:
+   582→   582→- uplift
+   583→   583→- forecast
+   584→   584→- confidence
+   585→   585→- evidence
+   586→   586→- sample size
+   587→   587→If historical evidence is insufficient:
+   588→   588→return low confidence.
+   589→   589→============================================================
+   590→   590→10. REORDER ENGINE
+   591→   591→============================================================
+   592→   592→Implement deterministic inventory optimization.
+   593→   593→Core idea:
+   594→   594→lead_time_demand
+   595→   595→+
+   596→   596→safety_stock
+   597→   597→+
+   598→   598→festival_buffer
+   599→   599→-
+   600→   600→available_stock
+   601→   601→-
+   602→   602→on_order_stock
+   603→   603→=
+   604→   604→reorder_need
+   605→   605→
+   606→   606→Then apply:
+   607→   607→- MOQ
+   608→   608→- pack size
+   609→   609→- supplier availability
+   610→   610→- budget where configured
+   611→   611→Do not allow the LLM to override these hard constraints.
+   612→   612→============================================================
+   613→   613→11. LLM AGENT
+   614→   614→============================================================
+   615→   615→Implement a real tool-calling agent.
+   616→   616→Suggested tools:
+   617→   617→get_sales_summary
+   618→   618→get_inventory_snapshot
+   619→   619→forecast_demand
+   620→   620→get_stockout_risk
+   621→   621→get_overstock_risk
+   622→   622→get_movement_classification
+   623→   623→analyze_festival_impact
+   624→   624→get_supplier_constraints
+   625→   625→calculate_reorder_quantity
+   626→   626→get_product_details
+   627→   627→create_purchase_order_draft
+   628→   628→validate_purchase_order
+   629→   629→
+   630→   630→The LLM must call tools instead of querying the database directly.
+   631→   631→Example:
+   632→   632→User:
+   633→   633→"What should I order before Diwali?"
+   634→   634→Agent:
+   635→   635→1. analyze intent
+   636→   636→2. get current inventory
+   637→   637→3. forecast relevant products
+   638→   638→4. analyze festival impact
+   639→   639→5. check supplier constraints
+   640→   640→6. calculate reorder
+   641→   641→7. explain recommendation
+   642→   642→8. ask manager for approval
+   643→   643→Do not pass hundreds of thousands of raw rows to the LLM.
+   644→   644→Aggregate using SQL/Pandas/services first.
+   645→   645→Send the LLM structured facts.
+   646→   646→============================================================
+   647→   647→12. HUMAN-IN-THE-LOOP
+   648→   648→============================================================
+   649→   649→This is mandatory.
+   650→   650→Every financially significant recommendation must support:
+   651→   651→Approve
+   652→   652→Modify
+   653→   653→Reject
+   654→   654→
+   655→   655→State machine:
+   656→   656→DRAFT
+   657→   657→↓
+   658→   658→PENDING_REVIEW
+   659→   659→├── REJECTED
+   660→   660→├── MODIFIED → PENDING_REVIEW
+   661→   661→└── APPROVED
+   662→   662→       ↓
+   663→   663→PO_GENERATED
+   664→   664→
+   665→   665→A PO cannot be generated from an unapproved recommendation.
+   666→   666→Store:
+   667→   667→- original AI quantity
+   668→   668→- manager quantity
+   669→   669→- manager
+   670→   670→- timestamp
+   671→   671→- comment
+   672→   672→- original reasoning
+   673→   673→- final action
+   674→   674→============================================================
+   675→   675→13. PURCHASE ORDERS
+   676→   676→============================================================
+   677→   677→Implement supplier-wise PO generation.
+   678→   678→PO must contain:
+   679→   679→- PO number
+   680→   680→- supplier
+   681→   681→- supplier GSTIN if available
+   682→   682→- store
+   683→   683→- SKU
+   684→   684→- product
+   685→   685→- quantity
+   686→   686→- unit price
+   687→   687→- taxable subtotal
+   688→   688→- CGST/SGST/IGST where applicable
+   689→   689→- total
+   690→   690→- approval reference
+   691→   691→- generated timestamp
+   692→   692→PO creation must be transactional and idempotent.
+   693→   693→============================================================
+   694→   694→14. GST
+   695→   695→============================================================
+   696→   696→Implement GST as a supporting module.
+   697→   697→Store:
+   698→   698→- GSTIN
+   699→   699→- GST rate
+   700→   700→- taxable value
+   701→   701→- CGST
+   702→   702→- SGST
+   703→   703→- IGST
+   704→   704→Calculations must be deterministic.
+   705→   705→Do not position the application as professional tax filing software.
+   706→   706→============================================================
+   707→   707→15. AI BILL SCANNER
+   708→   708→============================================================
+   709→   709→Implement as an optional feature.
+   710→   710→Pipeline:
+   711→   711→upload
+   712→   712→ ↓
+   713→   713→file validation
+   714→   714→ ↓
+   715→   715→OCR/vision
+   716→   716→ ↓
+   717→   717→structured extraction
+   718→   718→ ↓
+   719→   719→confidence check
+   720→   720→ ↓
+   721→   721→human verification
+   722→   722→ ↓
+   723→   723→database update
+   724→   724→Never silently write low-confidence OCR results into financial records.
+   725→   725→============================================================
+   726→   726→16. FRONTEND
+   727→   727→============================================================
+   728→   728→Build a polished production-grade React application.
+   729→   729→Do not build a generic admin template.
+   730→   730→Pages:
+   731→   731→1. Login
+   732→   732→2. Main Dashboard
+   733→   733→3. Inventory
+   734→   734→4. Product detail
+   735→   735→5. Forecasting
+   736→   736→6. Inventory Risks
+   737→   737→7. AI Recommendations
+   738→   738→8. Agent Chat
+   739→   739→9. Festivals
+   740→   740→10. Suppliers
+   741→   741→11. Purchase Orders
+   742→   742→12. Sales Analytics
+   743→   743→13. GST
+   744→   744→14. Bill Scanner
+   745→   745→15. Audit Logs
+   746→   746→16. Model/AI Health
+   747→   747→17. Settings
+   748→   748→Dashboard should prominently show:
+   749→   749→- total sales
+   750→   750→- stockout risks
+   751→   751→- overstock risks
+   752→   752→- fast movers
+   753→   753→- slow movers
+   754→   754→- pending approvals
+   755→   755→- upcoming festival impact
+   756→   756→- reorder value
+   757→   757→============================================================
+   758→   758→17. AGENT CHAT UI
+   759→   759→============================================================
+   760→   760→The chat experience should support queries like:
+   761→   761→"What products are at risk of stocking out?"
+   762→   762→"What should I reorder today?"
+   763→   763→"What will Diwali change?"
+   764→   764→"Why are you recommending 250 units?"
+   765→   765→"Show me the products where demand is increasing."
+   766→   766→"Group recommended purchases by supplier."
+   767→   767→"Create a PO for approved recommendations."
+   768→   768→The UI must show supporting evidence.
+   769→   769→Avoid presenting the agent as an uncontrolled autonomous purchasing bot.
+   770→   770→============================================================
+   771→   771→18. AUTHENTICATION + RBAC
+   772→   772→============================================================
+   773→   773→Implement roles:
+   774→   774→ADMIN
+   775→   775→OWNER
+   776→   776→MANAGER
+   777→   777→PROCUREMENT
+   778→   778→FINANCE
+   779→   779→ANALYST
+   780→   780→Protect APIs using authorization checks.
+   781→   781→Examples:
+   782→   782→Only authorized managers/procurement users can approve recommendations.
+   783→   783→Only authorized users can generate POs.
+   784→   784→Only admins can modify critical system configuration.
+   785→   785→============================================================
+   786→   786→19. AUDIT LOGGING
+   787→   787→============================================================
+   788→   788→Every important action must be auditable.
+   789→   789→Record:
+   790→   790→- user
+   791→   791→- tenant
+   792→   792→- timestamp
+   793→   793→- action
+   794→   794→- resource
+   795→   795→- before/after values
+   796→   796→- request ID
+   797→   797→- source
+   798→   798→- reason/comment
+   799→   799→Audit:
+   800→   800→- imports
+   801→   801→- recommendation creation
+   802→   802→- approval
+   803→   803→- modification
+   804→   804→- rejection
+   805→   805→- PO generation
+   806→   806→- supplier changes
+   807→   807→- model deployment
+   808→   808→- configuration changes
+   809→   809→============================================================
+   810→   810→20. SECURITY
+   811→   811→============================================================
+   812→   812→Implement:
+   813→   813→- secure authentication
+   814→   814→- RBAC
+   815→   815→- environment secrets
+   816→   816→- input validation
+   817→   817→- rate limiting
+   818→   818→- secure uploads
+   819→   819→- CORS policy
+   820→   820→- SQL injection protection
+   821→   821→- tenant isolation
+   822→   822→- audit logs
+   823→   823→- dependency scanning
+   824→   824→Protect LLM tools against:
+   825→   825→- prompt injection
+   826→   826→- tool abuse
+   827→   827→- unauthorized actions
+   828→   828→- cross-tenant leakage
+   829→   829→- data exfiltration
+   830→   830→Never put secrets in source code.
+   831→   831→Create:
+   832→   832→.env.example
+   833→   833→============================================================
+   834→   834→21. OBSERVABILITY
+   835→   835→============================================================
+   836→   836→Implement structured logging.
+   837→   837→Track:
+   838→   838→- request latency
+   839→   839→- API failures
+   840→   840→- agent calls
+   841→   841→- tool failures
+   842→   842→- forecast failures
+   843→   843→- OCR failures
+   844→   844→- recommendation counts
+   845→   845→- approval counts
+   846→   846→- PO failures
+   847→   847→- data quality failures
+   848→   848→ML monitoring:
+   849→   849→- MAE
+   850→   850→- WAPE/SMAPE
+   851→   851→- prediction drift
+   852→   852→- feature drift
+   853→   853→- model version
+   854→   854→Agent monitoring:
+   855→   855→- tool-call success
+   856→   856→- invalid tool arguments
+   857→   857→- unsupported claim rate
+   858→   858→- latency
+   859→   859→- policy violations
+   860→   860→============================================================
+   861→   861→22. BACKGROUND JOBS
+   862→   862→============================================================
+   863→   863→Use Redis plus worker architecture.
+   864→   864→Background jobs:
+   865→   865→- data imports
+   866→   866→- data validation
+   867→   867→- feature generation
+   868→   868→- forecast refresh
+   869→   869→- stockout scan
+   870→   870→- overstock scan
+   871→   871→- festival scan
+   872→   872→- recommendation refresh
+   873→   873→- OCR
+   874→   874→- report generation
+   875→   875→- data-quality checks
+   876→   876→Do not make expensive ML/OCR tasks block HTTP requests.
+   877→   877→============================================================
+   878→   878→23. API DESIGN
+   879→   879→============================================================
+   880→   880→Implement API versioning.
+   881→   881→At minimum:
+   882→   882→POST /api/v1/data/import
+   883→   883→POST /api/v1/data/validate
+   884→   884→
+   885→   885→GET  /api/v1/sales/summary
+   886→   886→GET  /api/v1/inventory
+   887→   887→GET  /api/v1/inventory/risks
+   888→   888→
+   889→   889→POST /api/v1/forecast
+   890→   890→GET  /api/v1/products/{id}/forecast
+   891→   891→
+   892→   892→GET  /api/v1/festivals/upcoming
+   893→   893→POST /api/v1/festival/analyze
+   894→   894→
+   895→   895→GET  /api/v1/recommendations
+   896→   896→POST /api/v1/recommendations/{id}/approve
+   897→   897→POST /api/v1/recommendations/{id}/modify
+   898→   898→POST /api/v1/recommendations/{id}/reject
+   899→   899→
+   900→   900→GET  /api/v1/purchase-orders
+   901→   901→POST /api/v1/purchase-orders
+   902→   902→
+   903→   903→POST /api/v1/bills/scan
+   904→   904→GET  /api/v1/gst/reports
+   905→   905→
+   906→   906→Use Pydantic schemas.
+   907→   907→Never expose internal database models directly as uncontrolled API responses.
+   908→   908→============================================================
+   909→   909→24. DATABASE / MIGRATIONS
+   910→   910→============================================================
+   911→   911→Use migrations.
+   912→   912→Use:
+   913→   913→- PostgreSQL
+   914→   914→- UUID identifiers where appropriate
+   915→   915→- timestamps
+   916→   916→- indexes
+   917→   917→- foreign keys
+   918→   918→- constraints
+   919→   919→Do not use SQLite for production.
+   920→   920→SQLite may be used only for tiny isolated tests if absolutely necessary.
+   921→   921→============================================================
+   922→   922→25. TESTING
+   923→   923→============================================================
+   924→   924→Do not consider the application complete without tests.
+   925→   925→Implement:
+   926→   926→Unit tests
+   927→   927→- reorder calculation
+   928→   928→- safety stock
+   929→   929→- lead-time demand
+   930→   930→- MOQ rounding
+   931→   931→- GST calculation
+   932→   932→- festival calculations
+   933→   933→- risk classification
+   934→   934→ML tests
+   935→   935→- feature schema
+   936→   936→- leakage checks
+   937→   937→- baseline comparison
+   938→   938→- model output schema
+   939→   939→- model artifact load
+   940→   940→Agent tests
+   941→   941→- tool selection
+   942→   942→- malformed tool arguments
+   943→   943→- hallucination resistance
+   944→   944→- approval enforcement
+   945→   945→- missing data
+   946→   946→- invalid supplier
+   947→   947→- PO safety
+   948→   948→Integration tests
+   949→   949→Test:
+   950→   950→import
+   951→   951→→ database
+   952→   952→→ forecasting
+   953→   953→→ recommendation
+   954→   954→→ approval
+   955→   955→→ PO
+   956→   956→
+   957→   957→E2E test
+   958→   958→Run:
+   959→   959→Indian retail data
+   960→   960→→ inventory state
+   961→   961→→ festival event
+   962→   962→→ elevated demand
+   963→   963→→ stockout risk
+   964→   964→→ recommendation
+   965→   965→→ manager modifies quantity
+   966→   966→→ PO generated
+   967→   967→
+   968→   968→============================================================
+   969→   969→26. DOCKER
+   970→   970→============================================================
+   971→   971→Create Dockerfiles for:
+   972→   972→- frontend
+   973→   973→- backend
+   974→   974→- worker
+   975→   975→Create:
+   976→   976→docker-compose.yml
+   977→   977→with:
+   978→   978→- PostgreSQL
+   979→   979→- Redis
+   980→   980→- API
+   981→   981→- worker
+   982→   982→- frontend
+   983→   983→The entire application should be startable using documented commands.
+   984→   984→Example:
+   985→   985→docker compose up --build
+   986→   986→
+   987→   987→============================================================
+   988→   988→27. PRODUCTION CONFIGURATION
+   989→   989→============================================================
+   990→   990→Support separate environments:
+   991→   991→development
+   992→   992→staging
+   993→   993→production
+   994→   994→
+   995→   995→Do not hardcode:
+   996→   996→- database URLs
+   997→   997→- API keys
+   998→   998→- LLM API keys
+   999→   999→- encryption keys
+  1000→  1000→- JWT secrets
+  1001→  1001→- storage credentials
+  1002→  1002→All must come from environment configuration.
+  1003→  1003→============================================================
+  1004→  1004→28. MODEL VERSIONING
+  1005→  1005→============================================================
+  1006→  1006→Every forecast must identify:
+  1007→  1007→- model version
+  1008→  1008→- training dataset
+  1009→  1009→- feature version
+  1010→  1010→- timestamp
+  1011→  1011→- validation metrics
+  1012→  1012→Store model metadata.
+  1013→  1013→Enable rollback to a previous model.
+  1014→  1014→============================================================
+  1015→  1015→29. DATA PROVENANCE
+  1016→  1016→============================================================
+  1017→  1017→For every dataset track:
+  1018→  1018→source
+  1019→  1019→dataset_name
+  1020→  1020→source_file
+  1021→  1021→download_time
+  1022→  1022→ingestion_run
+  1023→  1023→version
+  1024→  1024→synthetic_flag
+  1025→  1025→
+  1026→  1026→The UI/docs must distinguish:
+  1027→  1027→REAL_PUBLIC_DATA
+  1028→  1028→SYNTHETIC_DATA
+  1029→  1029→USER_UPLOADED_DATA
+  1030→  1030→CONNECTED_POS_DATA
+  1031→  1031→Never present synthetic prototype data as actual supermarket observations.
+  1032→  1032→============================================================
+  1033→  1033→30. FALLBACK / OFFLINE MODE
+  1034→  1034→============================================================
+  1035→  1035→The application must remain runnable even without external datasets.
+  1036→  1036→The following command must work:
+  1037→  1037→python scripts/generate_prototype_data.py --seed 42
+  1038→  1038→
+  1039→  1039→Then:
+  1040→  1040→python scripts/seed_demo.py
+  1041→  1041→
+  1042→  1042→The application must become usable with generated data.
+  1043→  1043→Generate realistic:
+  1044→  1044→- Indian products
+  1045→  1045→- Indian states/cities
+  1046→  1046→- categories
+  1047→  1047→- sales
+  1048→  1048→- stores
+  1049→  1049→- inventory
+  1050→  1050→- suppliers
+  1051→  1051→- lead times
+  1052→  1052→- MOQ
+  1053→  1053→- purchase orders
+  1054→  1054→- festivals
+  1055→  1055→- GST records
+  1056→  1056→Use Indian Rupees.
+  1057→  1057→============================================================
+  1058→  1058→31. PRODUCT EXPERIENCE
+  1059→  1059→============================================================
+  1060→  1060→The application should feel like an actual commercial product.
+  1061→  1061→Do not use:
+  1062→  1062→- random placeholder cards
+  1063→  1063→- fake AI responses
+  1064→  1064→- static mock recommendation numbers
+  1065→  1065→- fake charts
+  1066→  1066→- hardcoded dashboard metrics
+  1067→  1067→All displayed business metrics must come from the database.
+  1068→  1068→If there is no data yet:
+  1069→  1069→show an explicit empty state and provide:
+  1070→  1070→"Load Demo Data"
+  1071→  1071→which executes/seeds the synthetic dataset.
+  1072→  1072→============================================================
+  1073→  1073→32. DEMO MODE
+  1074→  1074→============================================================
+  1075→  1075→Create a deterministic demo scenario.
+  1076→  1076→Example:
+  1077→  1077→Product:
+  1078→  1078→Milk 500ml
+  1079→  1079→Current stock:
+  1080→  1080→80
+  1081→  1081→Average daily sales:
+  1082→  1082→~65
+  1083→  1083→Lead time:
+  1084→  1084→2 days
+  1085→  1085→MOQ:
+  1086→  1086→100
+  1087→  1087→Upcoming event:
+  1088→  1088→Diwali
+  1089→  1089→The system should calculate a realistic recommendation using the actual models/business logic.
+  1090→  1090→Do not hardcode "250" just because the example exists in documentation.
+  1091→  1091→============================================================
+  1092→  1092→33. AGENT DEMONSTRATION SCENARIOS
+  1093→  1093→============================================================
+  1094→  1094→Support at least these demos:
+  1095→  1095→Scenario 1:
+  1096→  1096→"What should I reorder today?"
+  1097→  1097→Scenario 2:
+  1098→  1098→"Which items are likely to stock out?"
+  1099→  1099→Scenario 3:
+  1100→  1100→"What will Diwali change?"
+  1101→  1101→Scenario 4:
+  1102→  1102→"Why are these products high risk?"
+  1103→  1103→Scenario 5:
+  1104→  1104→"Show me slow-moving inventory."
+  1105→  1105→Scenario 6:
+  1106→  1106→"Group all recommended orders by supplier."
+  1107→  1107→Scenario 7:
+  1108→  1108→"Prepare purchase orders for the approved recommendations."
+  1109→  1109→The last action must enforce approval.
+  1110→  1110→============================================================
+  1111→  1111→34. PERFORMANCE
+  1112→  1112→============================================================
+  1113→  1113→Keep expensive operations asynchronous.
+  1114→  1114→Optimize database queries.
+  1115→  1115→Add indexes after measuring actual query patterns.
+  1116→  1116→Cache repeated dashboard queries where helpful.
+  1117→  1117→Do not send raw millions-row datasets to the frontend or LLM.
+  1118→  1118→============================================================
+  1119→  1119→35. DOCUMENTATION
+  1120→  1120→============================================================
+  1121→  1121→Update/create:
+  1122→  1122→README.md
+  1123→  1123→docs/IMPLEMENTATION_STATUS.md
+  1124→  1124→docs/DATASET_SETUP.md
+  1125→  1125→docs/API.md
+  1126→  1126→docs/DEPLOYMENT.md
+  1127→  1127→docs/ML.md
+  1128→  1128→docs/AGENT.md
+  1129→  1129→docs/SECURITY.md
+  1130→  1130→docs/TROUBLESHOOTING.md
+  1131→  1131→README must include:
+  1132→  1132→- architecture
+  1133→  1133→- setup
+  1134→  1134→- local development
+  1135→  1135→- dataset setup
+  1136→  1136→- CLI commands
+  1137→  1137→- prototype data generation
+  1138→  1138→- environment variables
+  1139→  1139→- database migration
+  1140→  1140→- tests
+  1141→  1141→- Docker
+  1142→  1142→- deployment
+  1143→  1143→============================================================
+  1144→  1144→36. DATASET DOCUMENTATION
+  1145→  1145→============================================================
+  1146→  1146→Create:
+  1147→  1147→docs/DATASET_SETUP.md
+  1148→  1148→For each dataset document:
+  1149→  1149→- purpose
+  1150→  1150→- acquisition method
+  1151→  1151→- terminal command
+  1152→  1152→- file location
+  1153→  1153→- expected schema
+  1154→  1154→- validation
+  1155→  1155→- project usage
+  1156→  1156→- fallback generator
+  1157→  1157→- provenance classification
+  1158→  1158→Explicitly document:
+  1159→  1159→Indian Superstore:
+  1160→  1160→secondary validation
+  1161→  1161→SupplyStream:
+  1162→  1162→supplier/inventory/logistics simulation
+  1163→  1163→Whylogs Ecommerce:
+  1164→  1164→Indian grocery/product intelligence
+  1165→  1165→============================================================
+  1166→  1166→37. DO NOT OVERFIT THE ARCHITECTURE TO THE HACKATHON
+  1167→  1167→============================================================
+  1168→  1168→This is a production-oriented application.
+  1169→  1169→Implement the MVP quickly, but structure it so that it can later support:
+  1170→  1170→- multiple stores
+  1171→  1171→- multiple businesses
+  1172→  1172→- ERP integrations
+  1173→  1173→- POS APIs
+  1174→  1174→- real supplier APIs
+  1175→  1175→- model retraining
+  1176→  1176→- model monitoring
+  1177→  1177→- larger datasets
+  1178→  1178→- enterprise RBAC
+  1179→  1179→- cloud deployment
+  1180→  1180→============================================================
+  1181→  1181→38. IMPLEMENTATION PROCESS
+  1182→  1182→============================================================
+  1183→  1183→Follow this order.
+  1184→  1184→PHASE 1
+  1185→  1185→Read all four technical documents.
+  1186→  1186→PHASE 2
+  1187→  1187→Inspect repository.
+  1188→  1188→PHASE 3
+  1189→  1189→Acquire datasets via terminal.
+  1190→  1190→PHASE 4
+  1191→  1191→Create fallback synthetic-data generation.
+  1192→  1192→PHASE 5
+  1193→  1193→Set up PostgreSQL and migrations.
+  1194→  1194→PHASE 6
+  1195→  1195→Build canonical data models.
+  1196→  1196→PHASE 7
+  1197→  1197→Build ingestion pipeline.
+  1198→  1198→PHASE 8
+  1199→  1199→Build feature engineering.
+  1200→  1200→PHASE 9
+  1201→  1201→Build baseline forecasting.
+  1202→  1202→PHASE 10
+  1203→  1203→Build stockout/overstock/movement intelligence.
+  1204→  1204→PHASE 11
+  1205→  1205→Build festival intelligence.
+  1206→  1206→PHASE 12
+  1207→  1207→Build reorder optimizer.
+  1208→  1208→PHASE 13
+  1209→  1209→Build supplier intelligence.
+  1210→  1210→PHASE 14
+  1211→  1211→Build LLM tool layer.
+  1212→  1212→PHASE 15
+  1213→  1213→Build agent orchestration.
+  1214→  1214→PHASE 16
+  1215→  1215→Build approval workflow.
+  1216→  1216→PHASE 17
+  1217→  1217→Build PO generation.
+  1218→  1218→PHASE 18
+  1219→  1219→Build frontend.
+  1220→  1220→PHASE 19
+  1221→  1221→Build OCR/GST modules.
+  1222→  1222→PHASE 20
+  1223→  1223→Add authentication/RBAC/audit.
+  1224→  1224→PHASE 21
+  1225→  1225→Write tests.
+  1226→  1226→PHASE 22
+  1227→  1227→Dockerize.
+  1228→  1228→PHASE 23
+  1229→  1229→Run full integration/E2E test.
+  1230→  1230→PHASE 24
+  1231→  1231→Fix all critical issues.
+  1232→  1232→PHASE 25
+  1233→  1233→Update documentation.
+  1234→  1234→Do not skip foundational phases merely to produce screenshots.
+  1235→  1235→============================================================
+  1236→  1236→39. DEFINITION OF DONE
+  1237→  1237→============================================================
+  1238→  1238→Do not say the project is complete because the UI loads.
+  1239→  1239→The project is complete only when:
+  1240→  1240→[ ] frontend works
+  1241→  1241→[ ] backend works
+  1242→  1242→[ ] PostgreSQL works
+  1243→  1243→[ ] migrations work
+  1244→  1244→[ ] datasets can be loaded
+  1245→  1245→[ ] offline synthetic dataset generation works
+  1246→  1246→[ ] ingestion works
+  1247→  1247→[ ] data validation works
+  1248→  1248→[ ] forecast model trains
+  1249→  1249→[ ] forecast model evaluates
+  1250→  1250→[ ] forecast inference works
+  1251→  1251→[ ] stockout risk works
+  1252→  1252→[ ] overstock detection works
+  1253→  1253→[ ] fast/slow analysis works
+  1254→  1254→[ ] festival intelligence works
+  1255→  1255→[ ] reorder engine works
+  1256→  1256→[ ] supplier constraints work
+  1257→  1257→[ ] LLM agent works
+  1258→  1258→[ ] tools work
+  1259→  1259→[ ] agent cannot bypass approval
+  1260→  1260→[ ] recommendations work
+  1261→  1261→[ ] approval workflow works
+  1262→  1262→[ ] purchase orders work
+  1263→  1263→[ ] GST works
+  1264→  1264→[ ] bill scanning works or is cleanly isolated as optional
+  1265→  1265→[ ] analytics work
+  1266→  1266→[ ] authentication works
+  1267→  1267→[ ] RBAC works
+  1268→  1268→[ ] audit logs work
+  1269→  1269→[ ] background jobs work
+  1270→  1270→[ ] tests pass
+  1271→  1271→[ ] Docker works
+  1272→  1272→[ ] README works
+  1273→  1273→[ ] deployment documentation works
+  1274→  1274→[ ] no secrets are committed
+  1275→  1275→[ ] no critical TODOs remain
+  1276→  1276→============================================================
+  1277→  1277→40. FINAL RULE
+  1278→  1278→============================================================
+  1279→  1279→Build this as a real product.
+  1280→  1280→Do not create fake AI.
+  1281→  1281→Do not hardcode business results.
+  1282→  1282→Do not fabricate dataset statistics.
+  1283→  1283→Do not let dataset download issues stop development.
+  1284→  1284→Do not let the LLM directly manipulate financial/inventory records.
+  1285→  1285→Do not bypass human approval.
+  1286→  1286→Do not send huge raw datasets to the LLM.
+  1287→  1287→Do not claim synthetic data is real.
+  1288→  1288→Use the supplied project documents as the specification.
+  1289→  1289→When something cannot be obtained externally, implement a transparent synthetic fallback and continue.
+  1290→  1290→When something is ambiguous, prefer the architecture and requirements defined in:
+  1291→  1291→- PRD.md
+  1292→  1292→- MVP Tech Doc.md
+  1293→  1293→- system Design.md
+  1294→  1294→- Architecture.md
+  1295→  1295→The final result must be a complete, locally runnable, testable, Dockerized, production-oriented AI Inventory Decision Agent with an actual ML layer and an actual tool-using LLM agent.
+  1296→  1296→
+  1297→  1297→A couple of important implementation details are now verified against the current sources: the Indian Superstore repository contains `superstore-sales-analysis.xlsx` and describes its 12-month Indian retail dataset; SupplyStream currently includes `generate_data.py` and documents the `pip install` → `git clone` → `python generate_data.py` workflow; and Whylogs' Ecommerce dataset is explicitly described as grocery-supermarket data from India, derived from BigBasket, with the `whylogs[datasets]` + `Ecommerce(version="base")` loading pattern. :chatgpt-content-reference{index="0"}
+  1298→  1298→
+  1299→  1299→**One important change from the earlier plan:** I would have the agent **validate each dataset before using it for model training**. For example, the Indian Retail Sales Analytics repository itself notes that all customer/product IDs are unique and flags other data-quality oddities, so it should be treated as a secondary benchmark/validation source rather than blindly treated as realistic repeat-purchase POS data. :chatgpt-content-reference{index="1"}
+  1300→  1300→
+  1301→  1301→This prompt is designed to be pasted **after placing the four `.md` files in the project's root directory**.

@@ -1,0 +1,374 @@
+// AI Inventory Decision Agent - Database Schema
+// PostgreSQL-style schema adapted for SQLite (local dev)
+// All business entities are tenant-aware
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================
+// AUTH & RBAC
+// ============================================================
+
+model Tenant {
+  id          String   @id @default(cuid())
+  name        String
+  code        String   @unique
+  gstin       String?
+  createdAt   DateTime @default(now())
+  users       User[]
+  stores      Store[]
+  products    Product[]
+  suppliers   Supplier[]
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String
+  passwordHash String
+  role         String   @default("ANALYST") // ADMIN, OWNER, MANAGER, PROCUREMENT, FINANCE, ANALYST
+  tenantId     String
+  tenant       Tenant   @relation(fields: [tenantId], references: [id])
+  approvals    Approval[]
+  auditEvents  AuditEvent[]
+  createdAt    DateTime @default(now())
+}
+
+// ============================================================
+// MASTER DATA
+// ============================================================
+
+model Store {
+  id           String   @id @default(cuid())
+  tenantId     String
+  tenant       Tenant   @relation(fields: [tenantId], references: [id])
+  code         String
+  name         String
+  city         String?
+  state        String?
+  region       String?
+  createdAt    DateTime @default(now())
+  inventory    InventorySnapshot[]
+  sales        Sale[]
+  purchaseOrders PurchaseOrder[]
+  forecasts    Forecast[]
+
+  @@unique([tenantId, code])
+}
+
+model Product {
+  id            String   @id @default(cuid())
+  tenantId      String
+  tenant        Tenant   @relation(fields: [tenantId], references: [id])
+  sku           String
+  name          String
+  brand         String?
+  category      String?
+  subcategory   String?
+  unit          String?
+  gstRate       Float    @default(0)
+  mrp           Float    @default(0)
+  sellingPrice  Float    @default(0)
+  isActive      Boolean  @default(true)
+  sourceDataset String?
+  createdAt     DateTime @default(now())
+  sales         Sale[]
+  inventory     InventorySnapshot[]
+  forecasts     Forecast[]
+  recommendations Recommendation[]
+  poLines       PurchaseOrderLine[]
+  supplierProducts SupplierProduct[]
+
+  @@unique([tenantId, sku])
+}
+
+model Supplier {
+  id               String   @id @default(cuid())
+  tenantId         String
+  tenant           Tenant   @relation(fields: [tenantId], references: [id])
+  code             String
+  name             String
+  gstin            String?
+  leadTimeDays     Int      @default(3)
+  minOrderQty      Int      @default(1)
+  reliabilityScore Float    @default(0.9)
+  paymentTerms     String   @default("Net 30")
+  createdAt        DateTime @default(now())
+  supplierProducts SupplierProduct[]
+  purchaseOrders   PurchaseOrder[]
+  recommendations  Recommendation[]
+
+  @@unique([tenantId, code])
+}
+
+model SupplierProduct {
+  id           String   @id @default(cuid())
+  supplierId   String
+  supplier     Supplier @relation(fields: [supplierId], references: [id])
+  productId    String
+  product      Product  @relation(fields: [productId], references: [id])
+  unitCost     Float
+  preferred    Boolean  @default(false)
+  createdAt    DateTime @default(now())
+}
+
+// ============================================================
+// TRANSACTIONAL DATA
+// ============================================================
+
+model Sale {
+  id            String   @id @default(cuid())
+  tenantId      String
+  storeId       String
+  store         Store    @relation(fields: [storeId], references: [id])
+  productId     String
+  product       Product  @relation(fields: [productId], references: [id])
+  saleTimestamp DateTime
+  quantity      Float
+  unitPrice     Float
+  discount      Float    @default(0)
+  netSales      Float
+  paymentType   String   @default("CASH")
+  sourceDataset String?
+  customerName  String?
+  region        String?
+  createdAt     DateTime @default(now())
+}
+
+model InventorySnapshot {
+  id            String   @id @default(cuid())
+  tenantId      String
+  storeId       String
+  store         Store    @relation(fields: [storeId], references: [id])
+  productId     String
+  product       Product  @relation(fields: [productId], references: [id])
+  snapshotDate  DateTime
+  onHandQty     Float
+  reservedQty   Float    @default(0)
+  damagedQty    Float    @default(0)
+  reorderPoint  Float?
+  maxStock      Float?
+  createdAt     DateTime @default(now())
+
+  @@unique([tenantId, storeId, productId, snapshotDate])
+}
+
+// ============================================================
+// FESTIVAL / EVENTS
+// ============================================================
+
+model Festival {
+  id         String   @id @default(cuid())
+  name       String
+  eventType  String   @default("CULTURAL")
+  startDate  DateTime
+  endDate    DateTime
+  region     String   @default("ALL_INDIA")
+  importance Float    @default(0.5)
+  categories String?
+  createdAt  DateTime @default(now())
+}
+
+// ============================================================
+// ML / FORECASTS / MODEL VERSIONS
+// ============================================================
+
+model ModelVersion {
+  id              String   @id @default(cuid())
+  modelName       String
+  version         String
+  featureVersion  String
+  trainingDataset String?
+  metricsJson     String?
+  status          String   @default("ACTIVE")
+  createdAt       DateTime @default(now())
+  forecasts       Forecast[]
+}
+
+model Forecast {
+  id             String   @id @default(cuid())
+  tenantId       String
+  storeId        String?
+  store          Store?   @relation(fields: [storeId], references: [id])
+  productId      String
+  product        Product  @relation(fields: [productId], references: [id])
+  forecastDate   DateTime
+  horizonDays    Int
+  predictedQty   Float
+  lowerBound     Float?
+  upperBound     Float?
+  confidence     Float?
+  modelVersionId String
+  modelVersion   ModelVersion @relation(fields: [modelVersionId], references: [id])
+  createdAt      DateTime @default(now())
+
+  @@unique([tenantId, storeId, productId, forecastDate, horizonDays])
+}
+
+// ============================================================
+// RECOMMENDATIONS & APPROVALS
+// ============================================================
+
+model Recommendation {
+  id              String   @id @default(cuid())
+  tenantId        String
+  storeId         String?
+  productId       String
+  product         Product  @relation(fields: [productId], references: [id])
+  supplierId      String?
+  supplier        Supplier? @relation(fields: [supplierId], references: [id])
+  recommendedQty  Float
+  estimatedCost   Float?
+  riskLevel       String
+  confidence      Float?
+  reasoningSummary String?
+  festivalEffect  String?
+  status          String   @default("PENDING_REVIEW") // PENDING_REVIEW, APPROVED, REJECTED, MODIFIED, PO_GENERATED
+  modelVersionId  String?
+  currentStock    Float
+  forecastQty     Float
+  leadTimeDays    Int
+  moq             Int
+  safetyStock     Float
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  approvals       Approval[]
+  poLines         PurchaseOrderLine[]
+
+  @@index([tenantId, status])
+}
+
+model RecommendationEvidence {
+  id              String   @id @default(cuid())
+  recommendationId String
+  field           String
+  value           String
+  source          String
+  createdAt       DateTime @default(now())
+}
+
+model Approval {
+  id              String   @id @default(cuid())
+  tenantId        String
+  recommendationId String
+  recommendation  Recommendation @relation(fields: [recommendationId], references: [id])
+  userId          String
+  user            User     @relation(fields: [userId], references: [id])
+  action          String   // APPROVE, REJECT, MODIFY
+  originalQty     Float?
+  finalQty        Float?
+  comment         String?
+  createdAt       DateTime @default(now())
+}
+
+// ============================================================
+// PURCHASE ORDERS
+// ============================================================
+
+model PurchaseOrder {
+  id                 String   @id @default(cuid())
+  tenantId           String
+  poNumber           String   @unique
+  supplierId         String
+  supplier           Supplier @relation(fields: [supplierId], references: [id])
+  storeId            String
+  store              Store    @relation(fields: [storeId], references: [id])
+  orderDate          DateTime @default(now())
+  status             String   @default("DRAFT") // DRAFT, SENT, ACKNOWLEDGED, PARTIALLY_FULFILLED, FULFILLED, CANCELLED
+  currency           String   @default("INR")
+  subtotal           Float    @default(0)
+  taxAmount          Float    @default(0)
+  estimatedTotal     Float    @default(0)
+  approvalReferenceId String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  lines              PurchaseOrderLine[]
+}
+
+model PurchaseOrderLine {
+  id              String   @id @default(cuid())
+  poId            String
+  po              PurchaseOrder @relation(fields: [poId], references: [id])
+  productId       String
+  product         Product  @relation(fields: [productId], references: [id])
+  recommendationId String?
+  recommendation  Recommendation? @relation(fields: [recommendationId], references: [id])
+  quantity        Float
+  unitPrice       Float
+  subtotal        Float
+  taxAmount       Float  @default(0)
+  gstRate         Float  @default(0)
+}
+
+// ============================================================
+// GST
+// ============================================================
+
+model GstTransaction {
+  id            String   @id @default(cuid())
+  tenantId      String
+  transactionType String // PURCHASE, SALE
+  referenceId   String?
+  partyGstin    String?
+  partyName     String?
+  taxableValue  Float
+  gstRate       Float
+  cgst          Float    @default(0)
+  sgst          Float    @default(0)
+  igst          Float    @default(0)
+  total         Float
+  invoiceDate   DateTime
+  invoiceNumber String?
+  createdAt     DateTime @default(now())
+}
+
+// ============================================================
+// AUDIT & DATA QUALITY
+// ============================================================
+
+model AuditEvent {
+  id          String   @id @default(cuid())
+  tenantId    String?
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id])
+  action      String
+  resourceType String?
+  resourceId  String?
+  requestId   String?
+  oldValue    String?
+  newValue    String?
+  source      String?
+  reason      String?
+  timestamp   DateTime @default(now())
+}
+
+model DataSource {
+  id           String   @id @default(cuid())
+  sourceName   String
+  sourceType   String   // REAL_PUBLIC, SYNTHETIC, USER_UPLOADED, CONNECTED_POS
+  sourceFile   String?
+  downloadTime DateTime?
+  ingestionRun String?
+  version      String?
+  syntheticFlag Boolean @default(false)
+  schemaJson   String?
+  rowCount     Int?
+  createdAt    DateTime @default(now())
+}
+
+model DataQualityRun {
+  id           String   @id @default(cuid())
+  dataSourceId String?
+  status       String   @default("PENDING") // PENDING, OK, WARN, FAIL
+  totalRows    Int      @default(0)
+  validRows    Int      @default(0)
+  quarantinedRows Int   @default(0)
+  issuesJson   String?
+  createdAt    DateTime @default(now())
+}
