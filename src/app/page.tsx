@@ -102,7 +102,7 @@ export default function HomePage() {
       {page === 'risks' && <RisksPage />}
       {page === 'recommendations' && <RecommendationsPage />}
       {page === 'agent' && <AgentChatPage />}
-      {page === 'festivals' && <FestivalsPage />}
+      {page === 'festivals' && <FestivalsPage onNavigate={(p) => setPage(p as any)} />}
       {page === 'suppliers' && <SuppliersPage />}
       {page === 'purchase-orders' && <PurchaseOrdersPage />}
       {page === 'analytics' && <AnalyticsPage />}

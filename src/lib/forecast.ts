@@ -452,7 +452,6 @@ export async function forecastDemand(
     },
   }).catch(() => {});
 
-  }).catch(() => {});
 
   return {
     productId,
