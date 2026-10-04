@@ -54,8 +54,6 @@ server.log
 /skills/
 python-backend/venv/
 python-backend/__pycache__/
-*.joblib
-datasets/
 download/
 upload/
 .next/

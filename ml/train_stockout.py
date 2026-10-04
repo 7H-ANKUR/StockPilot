@@ -34,7 +34,7 @@ def run_stockout_pipeline():
     X_val, y_val = val_df[features], val_df[target]
     
     print("Training RandomForest Classifier for Stockout Risk...")
-    model = RandomForestClassifier(n_estimators=50, random_state=42, class_weight='balanced')
+    model = RandomForestClassifier(n_estimators=30, max_depth=10, random_state=42, class_weight='balanced')
     model.fit(X_train, y_train)
     
     preds = model.predict(X_val)
