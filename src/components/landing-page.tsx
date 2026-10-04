@@ -1,7 +1,6 @@
 'use client';
 
-import { useState } from 'react';
-import { useToast } from '@/hooks/use-toast';
+import { useState, useEffect } from 'react';
 
 interface LandingPageProps {
   onEnterDashboard: () => void;
@@ -9,8 +8,25 @@ interface LandingPageProps {
 }
 
 export function LandingPage({ onEnterDashboard, bootstrapping }: LandingPageProps) {
-  const { toast } = useToast();
   const [view, setView] = useState<'landing' | 'demo-loading'>('landing');
+  const [liveStats, setLiveStats] = useState<{ products: number; stores: number; suppliers: number; festivals: number } | null>(null);
+
+  // Pull live summary from backend if data exists (for the trust strip)
+  useEffect(() => {
+    fetch('/api/v1/health')
+      .then(r => r.json())
+      .then(d => {
+        if (d.database && d.database.products > 0) {
+          setLiveStats({
+            products: d.database.products,
+            stores: 1, // single demo store
+            suppliers: d.database.suppliers,
+            festivals: d.database.festivals,
+          });
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const handleEnter = () => {
     setView('demo-loading');
@@ -243,18 +259,18 @@ export function LandingPage({ onEnterDashboard, bootstrapping }: LandingPageProp
           <div className="lp-visual-wrap">
             <div className="lp-halo"></div>
             <div className="lp-float lp-f1">
-              <strong>↓ 31% stockout risk</strong>
-              <small>After recommended reorder</small>
+              <strong>Example: ↓ 31% stockout risk</strong>
+              <small>After recommended reorder (demo scenario)</small>
             </div>
             <div className="lp-float lp-f2">
-              <strong>Diwali +37%</strong>
-              <small>Historical demand uplift</small>
+              <strong>Example: Diwali +37%</strong>
+              <small>Historical demand uplift (demo scenario)</small>
             </div>
 
             <div className="lp-dashboard-shell">
               <div className="lp-dash-top">
                 <div className="lp-dash-title"><div className="lp-dash-dot"></div> Retail Intelligence</div>
-                <div className="lp-status">System Online</div>
+                <div className="lp-status">Demo Scenario</div>
               </div>
               <div className="lp-dash-main">
                 <aside className="lp-side">
@@ -317,10 +333,22 @@ export function LandingPage({ onEnterDashboard, bootstrapping }: LandingPageProp
         </section>
 
         <section className="lp-trust" id="intelligence">
-          <div className="lp-trust-card"><strong>7 / 14 / 30</strong><span>Forecast horizons for short and medium-term inventory planning.</span></div>
-          <div className="lp-trust-card"><strong>Tool-calling AI</strong><span>The LLM reasons over verified forecasting, inventory, festival and supplier tools.</span></div>
-          <div className="lp-trust-card"><strong>Human approved</strong><span>Important purchasing actions require manager review before PO creation.</span></div>
-          <div className="lp-trust-card"><strong>India-first</strong><span>Indian retail data, Indian products, Indian suppliers and festival-aware planning.</span></div>
+          <div className="lp-trust-card">
+            <strong>{liveStats ? liveStats.products.toLocaleString() : '2,000+'}</strong>
+            <span>Products tracked{liveStats ? ' (live)' : ' in demo environment'} across categories from real Indian retail datasets.</span>
+          </div>
+          <div className="lp-trust-card">
+            <strong>{liveStats ? liveStats.suppliers : '8'}</strong>
+            <span>Suppliers configured{liveStats ? ' (live)' : ' in demo'} with GSTIN, lead time, MOQ, and reliability scores.</span>
+          </div>
+          <div className="lp-trust-card">
+            <strong>7 / 14 / 30</strong>
+            <span>Forecast horizons for short and medium-term inventory planning.</span>
+          </div>
+          <div className="lp-trust-card">
+            <strong>{liveStats ? liveStats.festivals : '11'}</strong>
+            <span>Indian festivals tracked{liveStats ? ' (live)' : ' in demo'}: Diwali, Holi, Eid, Raksha Bandhan, Navratri, and more.</span>
+          </div>
         </section>
 
         <section className="lp-band" id="how">

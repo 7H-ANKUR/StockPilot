@@ -30,7 +30,8 @@ interface InventoryItem {
   availableStock: number;
   reorderPoint: number;
   maxStock: number;
-  daysOfInventory: number;
+  daysOfInventory: number | null;
+  forecastAvailable: boolean;
   riskLevel: string;
   stockoutProbability: number;
   forecastDailyDemand: number;
@@ -178,13 +179,17 @@ export function InventoryPage() {
                         <div className="text-xs text-muted-foreground">RP: {item.reorderPoint?.toFixed(0) || '-'}</div>
                       </TableCell>
                       <TableCell className="text-right tabular-nums">
-                        <span className={
-                          item.daysOfInventory > 60 ? 'text-warning' :
-                          item.daysOfInventory < 7 ? 'text-destructive font-medium' :
-                          ''
-                        }>
-                          {item.daysOfInventory > 900 ? '∞' : item.daysOfInventory.toFixed(1)}
-                        </span>
+                        {item.daysOfInventory === null ? (
+                          <span className="text-muted-foreground italic text-xs">N/A</span>
+                        ) : (
+                          <span className={
+                            item.daysOfInventory > 60 ? 'text-warning' :
+                            item.daysOfInventory < 7 ? 'text-destructive font-medium' :
+                            ''
+                          }>
+                            {item.daysOfInventory.toFixed(1)}
+                          </span>
+                        )}
                       </TableCell>
                       <TableCell className="text-right tabular-nums text-sm">
                         {item.forecastDailyDemand.toFixed(1)}

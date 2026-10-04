@@ -62,6 +62,7 @@ export async function GET(req: NextRequest) {
       reorderPoint: inv.reorderPoint,
       maxStock: inv.maxStock,
       daysOfInventory: risk.daysOfInventory,
+      forecastAvailable: risk.forecastAvailable,
       riskLevel: risk.riskLevel,
       stockoutProbability: risk.stockoutProbability,
       forecastDailyDemand: risk.forecastDailyDemand,

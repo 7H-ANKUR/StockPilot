@@ -53,6 +53,9 @@ export async function generateRecommendations(
     // Compute reorder
     const reorder = await calculateReorder(inv.productId, DEFAULT_STORE_ID, festivalName);
     
+    // Per spec: "If forecast is unavailable, DO NOT automatically use MOQ as recommendation."
+    // Skip items with FORECAST_REQUIRED — they need forecast evidence before recommendation.
+    if (reorder.limitingConstraint === 'FORECAST_REQUIRED') continue;
     if (reorder.recommendedQty <= 0) continue;
     
     // Check if pending recommendation already exists for this product

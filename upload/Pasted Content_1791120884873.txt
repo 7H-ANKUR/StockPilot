@@ -1,0 +1,1884 @@
+MASTER PROMPT — FINAL PRODUCT POLISH + FULL SYSTEM INTEGRATION
+
+You are the lead product engineer, senior frontend engineer, backend engineer, ML engineer, Agentic AI engineer, UX designer, and production architect for the project:
+
+AI INVENTORY DECISION AGENT
+
+LIVE APPLICATION:
+https://inventory1222.space-z.ai/
+
+You are NOT starting from scratch.
+
+You are improving the existing implementation.
+
+============================================================
+1. FIRST — INSPECT EVERYTHING
+============================================================
+
+Before changing code:
+
+1. Open and inspect the current deployed application:
+   https://inventory1222.space-z.ai/
+
+2. Inspect every page and interaction.
+
+3. Read these project specification files from the repository:
+
+   - PRD.md
+   - MVP Tech Doc.md
+   - system Design.md
+   - Architecture.md
+
+4. Inspect the entire existing source tree.
+
+5. Inspect:
+   - frontend components
+   - backend routes
+   - database schema
+   - migrations
+   - seed scripts
+   - ingestion code
+   - ML code
+   - model registry
+   - agent implementation
+   - tool calling
+   - recommendation engine
+   - supplier logic
+   - PO generation
+   - GST
+   - analytics
+   - audit logs
+   - data-source registry
+   - deployment configuration
+
+Do not immediately edit code.
+
+First create:
+
+docs/CURRENT_SYSTEM_AUDIT.md
+
+with:
+
+- current feature
+- current implementation
+- problems
+- root cause
+- severity
+- required fix
+- affected files
+- verification method
+
+============================================================
+2. VERY IMPORTANT — THIS IS NOT ONLY A UI TASK
+============================================================
+
+The existing screenshots show that some pages look functional but the underlying data flow is incomplete.
+
+Examples of observed issues include:
+
+- Avg Order Value showing ₹0 while revenue and transactions are non-zero
+- "Last 30 days" showing ₹0 despite transactions existing
+- analytics charts empty
+- forecast values of 0
+- lead-time demand of 0
+- 999 days coverage used for unknown demand
+- recommendations generated even when forecast data is unavailable
+- only one model visible in the model registry
+- model metrics showing 0.00
+- 0 agent tool calls but 100% success rate
+- duplicated data-source entries
+- festival analysis too shallow
+- pages do not form a strong end-to-end operational workflow
+- dashboard looks like a collection of cards instead of a decision center
+
+Do NOT merely redesign these screens.
+
+Find and fix the underlying causes.
+
+============================================================
+3. PRODUCT VISION
+============================================================
+
+The final product must communicate one clear idea:
+
+EXISTING RETAIL SYSTEMS GENERATE DATA.
+
+AI INVENTORY DECISION AGENT
+turns that data into decisions.
+
+The core flow:
+
+DATA
+↓
+FORECAST
+↓
+RISK
+↓
+FESTIVAL INTELLIGENCE
+↓
+SUPPLIER CONSTRAINTS
+↓
+REORDER OPTIMIZATION
+↓
+LLM REASONING
+↓
+EXPLAINABLE RECOMMENDATION
+↓
+MANAGER APPROVAL
+↓
+PURCHASE ORDER
+
+This is an intelligence layer.
+
+It is NOT:
+
+- a POS replacement
+- a generic chatbot
+- fake AI
+- a simple sales dashboard
+- autonomous purchasing without approval
+
+============================================================
+4. LANDING PAGE — REDESIGN IT AS A REAL PRODUCT LANDING PAGE
+============================================================
+
+The landing page should look like a high-quality modern SaaS/product website.
+
+Visual direction:
+
+- clean
+- premium
+- minimal
+- white + very light green
+- emerald green accents
+- dark typography
+- subtle gradients
+- soft shadows
+- strong whitespace
+- professional typography
+- polished responsive layout
+
+Do NOT make it resemble an ordinary admin dashboard.
+
+The landing page must sell the PRODUCT.
+
+============================================================
+5. LANDING PAGE STRUCTURE
+============================================================
+
+Create:
+
+------------------------------------------------------------
+NAVBAR
+------------------------------------------------------------
+
+Left:
+
+AI Inventory
+Decision Agent
+
+Right:
+
+Product
+How It Works
+AI Intelligence
+Features
+Get Started
+
+Optional:
+
+Sign In
+
+------------------------------------------------------------
+HERO
+------------------------------------------------------------
+
+Main headline:
+
+"Turn Retail Data Into Better Inventory Decisions."
+
+Supporting text:
+
+"An Agentic AI layer for Indian retail — forecasting demand, preventing stockouts, understanding festival-driven demand, optimizing reorders, and preparing supplier-ready purchase orders with manager approval."
+
+Primary CTA:
+
+"Explore Platform"
+
+Secondary CTA:
+
+"See How It Works"
+
+------------------------------------------------------------
+HERO PRODUCT VISUAL
+------------------------------------------------------------
+
+The main hero must contain a high-quality dashboard/product mockup.
+
+Do not use a random decorative image.
+
+Show a realistic application state with:
+
+- revenue
+- units sold
+- stockout risk
+- recommendations
+- forecast
+- festival impact
+- agent insight
+
+The dashboard visual should look like the actual application.
+
+DO NOT invent unrelated fake screens.
+
+------------------------------------------------------------
+TRUST / VALUE STRIP
+------------------------------------------------------------
+
+Show four core capabilities:
+
+Demand Forecasting
+Stockout Prevention
+Smart Reorders
+Festival Intelligence
+
+------------------------------------------------------------
+HOW IT WORKS
+------------------------------------------------------------
+
+Visually show:
+
+01
+Forecast
+
+02
+Detect Risk
+
+03
+Reason
+
+04
+Approve
+
+05
+Procure
+
+------------------------------------------------------------
+AI SECTION
+------------------------------------------------------------
+
+Explain the difference between:
+
+ML models
+Deterministic inventory engine
+LLM agent
+
+Use wording like:
+
+"Models predict.
+Rules constrain.
+The agent reasons.
+Managers decide."
+
+------------------------------------------------------------
+FINAL CTA
+------------------------------------------------------------
+
+"Make every inventory decision with evidence."
+
+Button:
+
+"Open Dashboard"
+
+============================================================
+6. DO NOT DISPLAY FAKE BUSINESS CLAIMS
+============================================================
+
+The current landing page contains numbers such as:
+
+₹51.2L
+18.4K units
+13 high-risk SKUs
+Diwali +37%
+31% stockout reduction
+
+These must NOT be presented as real-world business achievements unless they come from actual measured application data.
+
+There are only three acceptable options:
+
+OPTION A:
+Load them dynamically from the real backend.
+
+OPTION B:
+Label them explicitly:
+
+"Demo Data"
+
+or:
+
+"Example Scenario"
+
+OPTION C:
+Remove the number.
+
+Never imply:
+
+"35% stockout reduction"
+
+unless the application has actually measured it.
+
+Never imply:
+
+"Trusted by 500 stores"
+
+unless this is genuinely true.
+
+Never invent customer logos.
+
+Never invent performance statistics.
+
+============================================================
+7. DASHBOARD — TURN IT INTO A DECISION CENTER
+============================================================
+
+The dashboard is currently too card-heavy.
+
+Redesign around manager decisions.
+
+Top:
+
+Good morning / afternoon, Manager
+
+Store selector
+Date range
+System health
+
+------------------------------------------------------------
+KEY BUSINESS METRICS
+------------------------------------------------------------
+
+Revenue
+Transactions
+Units Sold
+Inventory Value
+
+------------------------------------------------------------
+AI RISK SUMMARY
+------------------------------------------------------------
+
+Critical Stockouts
+High Risk
+Overstock
+Pending Reviews
+
+------------------------------------------------------------
+DEMAND INTELLIGENCE
+------------------------------------------------------------
+
+Actual Sales
+Forecast
+Trend
+Confidence
+
+Use a meaningful chart.
+
+------------------------------------------------------------
+FESTIVAL INTELLIGENCE
+------------------------------------------------------------
+
+Upcoming Festival
+
+Expected Demand Change
+
+Affected Categories
+
+Affected SKUs
+
+Confidence
+
+------------------------------------------------------------
+ACTION CENTER
+------------------------------------------------------------
+
+Instead of simply showing numbers:
+
+"13 products need immediate review"
+
+"4 products show festival-driven demand increase"
+
+"8 products have excess inventory"
+
+Each should have:
+
+[Review]
+
+and navigate to the correct workflow.
+
+------------------------------------------------------------
+AI DAILY BRIEF
+------------------------------------------------------------
+
+Show a concise LLM-generated summary from REAL tool outputs.
+
+Example:
+
+"Inventory risk increased today because 13 SKUs are below lead-time coverage. Four of those SKUs also show elevated festival demand."
+
+Every number must come from backend data.
+
+============================================================
+8. ANALYTICS — FIX THE DATA PIPELINE
+============================================================
+
+Current analytics has values like:
+
+Revenue = ₹0
+Transactions = 0
+Units = 0
+
+while other pages show transaction data.
+
+Find the root cause.
+
+Audit:
+
+- SQL
+- date filtering
+- time zones
+- timestamp parsing
+- frontend parameters
+- backend date handling
+- aggregation
+- joins
+
+Use one centralized date utility.
+
+Business timezone:
+
+Asia/Kolkata
+
+Implement correctly:
+
+7D
+30D
+90D
+1Y
+
+Calculate:
+
+Revenue:
+SUM(net_sales)
+
+Transactions:
+COUNT(DISTINCT sale_id)
+
+Units:
+SUM(quantity)
+
+AOV:
+Revenue / Transactions
+
+Never return ₹0 merely because a query failed.
+
+Distinguish:
+
+0
+NULL
+Unavailable
+No Data
+
+============================================================
+9. CHARTS
+============================================================
+
+Every chart must be real.
+
+Required:
+
+Revenue Trend
+Units Sold Trend
+Revenue by Category
+Revenue by Region/Store
+Top Products
+Demand Forecast
+
+If data exists, chart it.
+
+If no data exists:
+
+show:
+
+"No data available for this period."
+
+Do not show an empty white chart box.
+
+============================================================
+10. INVENTORY PAGE
+============================================================
+
+Keep:
+
+search
+category filter
+risk filter
+
+Add:
+
+Store filter
+Movement class
+ABC-XYZ
+Supplier
+Days of inventory
+
+Inventory table:
+
+SKU
+Product
+Category
+Stock
+On Order
+Daily Demand
+Days of Inventory
+Risk
+Supplier
+Forecast
+
+Clicking a row opens Product Detail.
+
+============================================================
+11. PRODUCT DETAIL
+============================================================
+
+Create a strong central Product Detail experience.
+
+Sections:
+
+Overview
+
+Inventory
+
+Historical Sales
+
+Forecast
+
+Risk
+
+Festival Impact
+
+Supplier
+
+Purchase History
+
+Recommendations
+
+GST
+
+Example:
+
+MILK 500ML
+
+Current Stock: 80
+On Order: 0
+Daily Demand: 65
+Forecast 7D: 455
+
+Stockout probability: 87%
+
+Lead Time: 3 days
+
+Supplier:
+ABC Foods
+
+MOQ:
+50
+
+Festival Impact:
++12%
+Confidence: 78%
+
+Recommendation:
+Order 250
+
+Why:
+Current inventory does not cover projected demand during supplier lead time.
+
+============================================================
+12. RISK MONITOR — FIX UNKNOWN VALUES
+============================================================
+
+Current system displays:
+
+LT Demand = 0
+Daily Demand = 0
+Days = 999
+
+This is wrong when demand is unknown.
+
+Use null/unknown internally.
+
+UI states:
+
+Forecast Available
+Forecast Unavailable
+
+Demand = 0 only when it is genuinely zero.
+
+Do NOT use 999 to represent infinite/unknown.
+
+If:
+
+forecast unavailable
+
+display:
+
+"Forecast unavailable"
+
+and do not generate a false reorder recommendation.
+
+============================================================
+13. OVERSTOCK
+============================================================
+
+Current overstock logic can interpret:
+
+Daily Demand = 0
+
+as:
+
+Days = 999
+
+Fix it.
+
+If demand is unavailable:
+
+NO_DEMAND_SIGNAL
+
+If historical demand is genuinely near zero:
+
+VERY_SLOW
+
+If inventory exceeds expected coverage:
+
+OVERSTOCK
+
+Explain why.
+
+============================================================
+14. MODEL REGISTRY — CRITICAL
+============================================================
+
+The current system displays only:
+
+RidgeRegressionDemandForecast
+
+That is insufficient.
+
+Create a real model registry.
+
+------------------------------------------------------------
+DEMAND FORECASTING
+------------------------------------------------------------
+
+Train candidates:
+
+1. Naive Baseline
+2. Ridge Regression
+3. Random Forest
+4. Gradient Boosting
+5. LightGBM or XGBoost if available
+
+Evaluate all candidates using the SAME chronological validation data.
+
+Example:
+
+MODEL
+Naive
+Ridge
+Random Forest
+Gradient Boosting
+LightGBM
+
+Metrics:
+
+MAE
+RMSE
+WAPE
+SMAPE where applicable
+
+Compare:
+
+Model MAE
+Baseline MAE
+Improvement vs Baseline
+
+Select best valid model.
+
+------------------------------------------------------------
+STOCKOUT RISK
+------------------------------------------------------------
+
+Use:
+
+Deterministic Coverage Engine
+
++
+
+ML classification model where reliable labels exist.
+
+Metrics:
+
+Precision
+Recall
+F1
+ROC-AUC
+PR-AUC
+Calibration
+
+------------------------------------------------------------
+MOVEMENT
+------------------------------------------------------------
+
+Fast
+Normal
+Slow
+
+ABC-XYZ
+
+------------------------------------------------------------
+FESTIVAL INTELLIGENCE
+------------------------------------------------------------
+
+Historical uplift model.
+
+Show:
+
+sample size
+uplift
+confidence
+validation period
+
+============================================================
+15. INVALID MODEL METRICS
+============================================================
+
+Current:
+
+MAE = 0
+RMSE = 0
+Baseline = 0
+
+Do not accept these without verifying the evaluation.
+
+Check:
+
+- validation set not empty
+- target variance
+- correct target
+- no data leakage
+- predictions not accidentally copied from targets
+- proper chronological split
+- correct joins
+
+If invalid:
+
+MODEL STATUS = FAILED
+
+Do not activate it.
+
+Never hide evaluation errors.
+
+============================================================
+16. MODEL HEALTH
+============================================================
+
+The page should show:
+
+------------------------------------------------
+Demand Forecasting
+
+Active Model
+Candidate Models
+Training Dataset
+Feature Version
+Training Date
+MAE
+RMSE
+WAPE
+Baseline WAPE
+Improvement
+
+------------------------------------------------
+Stockout Risk
+
+Active Model
+Precision
+Recall
+F1
+ROC-AUC
+Calibration
+
+------------------------------------------------
+Festival Intelligence
+
+Evidence
+Sample Size
+Average Uplift
+Confidence
+
+------------------------------------------------
+Agent
+
+Tool Calls
+Successful
+Failed
+Average Latency
+------------------------------------------------
+
+If:
+
+total tool calls = 0
+
+then:
+
+Success Rate = N/A
+
+NOT:
+
+100%
+
+============================================================
+17. FORECASTING PAGE
+============================================================
+
+Build an actual forecasting workspace.
+
+Controls:
+
+Product
+Store
+7D
+14D
+30D
+
+Show:
+
+historical sales
+future forecast
+confidence interval
+seasonality
+promotion
+festival markers
+model version
+
+Chart:
+
+Actual
+Forecast
+Upper bound
+Lower bound
+
+Below chart:
+
+FORECAST QUALITY
+
+MAE
+RMSE
+WAPE
+
+Then:
+
+INVENTORY IMPACT
+
+Current stock
+Forecast
+Lead time
+Risk
+
+============================================================
+18. FESTIVAL PAGE
+============================================================
+
+The current Festival page is too simple.
+
+Redesign it.
+
+Left:
+
+Upcoming festivals
+
+Right:
+
+Selected festival intelligence
+
+Example:
+
+DIWALI
+
+Date
+Region
+Type
+
+Historical Evidence
+
+Baseline Demand
+Festival Demand
+Observed Uplift
+Confidence
+Sample Size
+
+Affected Categories
+
+Affected Products
+
+Inventory Risk
+
+Recommended Additional Coverage
+
+Do not hardcode festival demand percentages.
+
+Calculate them.
+
+============================================================
+19. FESTIVAL MODEL
+============================================================
+
+For each product:
+
+Matched festival period
+versus
+matched non-festival baseline
+
+Calculate:
+
+uplift = festival demand / baseline demand - 1
+
+Then adjust for:
+
+- recent trend
+- promotion
+- region
+- seasonality
+
+If insufficient evidence:
+
+confidence = LOW
+
+and:
+
+"Insufficient historical evidence"
+
+Do not fabricate uplift.
+
+============================================================
+20. RECOMMENDATIONS
+============================================================
+
+Recommendations must show a decision trail.
+
+Example:
+
+PRODUCT
+Milk 500ml
+
+RISK
+CRITICAL
+
+CURRENT STOCK
+80
+
+FORECAST 7D
+455
+
+LEAD TIME
+3 days
+
+LEAD TIME DEMAND
+195
+
+SAFETY STOCK
+60
+
+ON ORDER
+0
+
+MOQ
+50
+
+FESTIVAL IMPACT
++12%
+
+RECOMMENDED
+250
+
+ESTIMATED COST
+₹7,000
+
+------------------------------------------------
+WHY?
+------------------------------------------------
+
+Show evidence.
+
+Then:
+
+[Approve]
+[Modify]
+[Reject]
+
+[View Full Analysis]
+
+============================================================
+21. RECOMMENDATION SAFETY
+============================================================
+
+If forecast is unavailable:
+
+DO NOT automatically use:
+
+MOQ
+
+as recommendation.
+
+Instead:
+
+FORECAST_REQUIRED
+
+or a clearly labelled baseline fallback.
+
+Financial recommendations need evidence.
+
+============================================================
+22. PURCHASE ORDER FLOW
+============================================================
+
+Correct flow:
+
+Risk
+↓
+Forecast
+↓
+Recommendation
+↓
+Manager Review
+↓
+Approve / Modify / Reject
+↓
+Approved
+↓
+Group By Supplier
+↓
+Validate
+↓
+PO Draft
+↓
+PO Generated
+
+Never generate a PO from:
+
+PENDING
+REJECTED
+FORECAST_REQUIRED
+
+============================================================
+23. SUPPLIER EXPERIENCE
+============================================================
+
+Current supplier page is structurally good but expand it.
+
+Supplier page:
+
+Total Suppliers
+Average Lead Time
+Reliability
+Pending POs
+Open Value
+
+Supplier detail:
+
+Profile
+GSTIN
+Lead Time
+MOQ
+Reliability
+Products
+Purchase History
+Delivery Performance
+Price History
+
+Use supplier data for actual reorder decisions.
+
+============================================================
+24. AGENT CHAT — REAL AGENT
+============================================================
+
+Do not call the system an agent merely because the page says:
+
+"Tool-calling LLM."
+
+Actually implement tool calling.
+
+Tools:
+
+get_sales_summary
+get_inventory_snapshot
+forecast_demand
+get_stockout_risk
+get_overstock_risk
+get_movement_classification
+analyze_festival_impact
+get_supplier_constraints
+get_product_details
+calculate_reorder_quantity
+create_purchase_order_draft
+validate_purchase_order
+
+Example:
+
+USER:
+
+"What should I reorder today?"
+
+AGENT:
+
+1. get inventory
+2. identify risks
+3. forecast demand
+4. inspect suppliers
+5. analyze festival if relevant
+6. calculate reorder
+7. explain
+8. ask for approval
+
+Record every tool call.
+
+============================================================
+25. AGENT TOOL PERFORMANCE
+============================================================
+
+Current:
+
+Total Calls = 0
+Success Rate = 100%
+
+Fix.
+
+When zero calls:
+
+Success Rate = N/A
+
+When calls happen:
+
+Success Rate =
+Successful / Total × 100
+
+Show:
+
+Total Calls
+Successful
+Failed
+Invalid Arguments
+Average Latency
+
+Store audit events.
+
+============================================================
+26. AGENT MUST BE GROUNDED
+============================================================
+
+Every number in the LLM response must originate from tool results.
+
+Bad:
+
+"Demand will increase by 40%."
+
+unless forecast/festival tool returned that.
+
+Good:
+
+"Historical festival-window demand was 37% higher than the matched baseline."
+
+with tool evidence.
+
+The LLM must never invent:
+
+- inventory
+- price
+- supplier
+- forecast
+- MOQ
+- GST
+- risk
+
+============================================================
+27. DATA SOURCES
+============================================================
+
+Fix duplicate dataset registrations.
+
+Each dataset gets:
+
+dataset_id
+dataset_name
+source
+file
+version
+ingestion_run
+download_time
+row_count
+synthetic_flag
+checksum
+
+Running ingestion twice should not duplicate the source.
+
+Use idempotency.
+
+============================================================
+28. DATASET STRATEGY
+============================================================
+
+Use Indian datasets.
+
+Primary:
+
+Supermart Grocery Sales
+Indian Retail Sales Analytics
+BigBasket Products
+
+Secondary:
+
+Indian Superstore Sales
+SupplyStream
+Whylogs Ecommerce
+
+Use each for the intended purpose from the documentation.
+
+Do not blindly merge incompatible datasets.
+
+Create canonical transformations.
+
+============================================================
+29. DATASET DOWNLOAD
+============================================================
+
+Make the repository agent-friendly.
+
+Create:
+
+scripts/download_datasets.py
+
+It should use CLI/terminal.
+
+Indian Superstore:
+
+gh repo clone Kashb-shielah/superstore-sales-analysis \
+data/raw/indian-superstore
+
+SupplyStream:
+
+gh repo clone MMathew4788/SupplyStream-Analytics-for-Retail-Logistics \
+data/raw/supplystream
+
+Then:
+
+cd data/raw/supplystream
+python -m pip install numpy pandas faker
+python generate_data.py
+
+Whylogs:
+
+pip install "whylogs[datasets]"
+
+Load:
+
+Ecommerce(version="base")
+
+If the source is unavailable:
+
+do not stop.
+
+Run:
+
+python scripts/generate_prototype_data.py --seed 42
+
+============================================================
+30. PROTOTYPE DATA
+============================================================
+
+Synthetic data must be realistic.
+
+Generate:
+
+100+
+products
+
+5+
+stores
+
+10+
+suppliers
+
+180+
+days
+
+daily sales
+
+inventory history
+
+purchase history
+
+supplier constraints
+
+festivals
+
+GST
+
+stockouts
+
+promotions
+
+seasonality
+
+Do not make most demand values zero.
+
+Do not generate broken relationships.
+
+Validate:
+
+sales > 0 for a meaningful percentage of SKUs
+inventory varies
+sales vary
+multiple dates
+multiple stores
+multiple suppliers
+multiple festivals
+
+============================================================
+31. DATA QUALITY
+============================================================
+
+Run checks before training:
+
+- missing IDs
+- duplicate transactions
+- bad dates
+- invalid quantities
+- invalid prices
+- invalid GST
+- orphan products
+- orphan suppliers
+- missing store
+- missing supplier
+- impossible inventory values
+
+Produce:
+
+docs/DATA_QUALITY_REPORT.md
+
+============================================================
+32. DATABASE
+============================================================
+
+Audit database queries for:
+
+- duplicate joins
+- incorrect aggregations
+- missing indexes
+- incorrect foreign keys
+- duplicate rows
+
+Use migrations.
+
+Ensure ingestion is idempotent.
+
+============================================================
+33. AUTHENTICATION
+============================================================
+
+Implement real permissions.
+
+Roles:
+
+ADMIN
+OWNER
+MANAGER
+PROCUREMENT
+FINANCE
+ANALYST
+
+Server-side authorization is mandatory.
+
+Do not rely on frontend permissions.
+
+============================================================
+34. AUDIT
+============================================================
+
+Audit:
+
+recommendation creation
+approval
+modification
+rejection
+PO generation
+agent tool calls
+data ingestion
+model training
+model activation
+configuration changes
+
+Store:
+
+timestamp
+user
+resource
+before
+after
+request ID
+
+============================================================
+35. HEALTH CHECKS
+============================================================
+
+Do not display "System Online" simply because the frontend loaded.
+
+Implement:
+
+/health
+/ready
+
+Health should check appropriate dependencies.
+
+Frontend should use real health state.
+
+============================================================
+36. ERROR STATES
+============================================================
+
+Every page supports:
+
+loading
+success
+empty
+error
+retry
+
+Never render empty boxes without explanation.
+
+Examples:
+
+"No forecast available."
+"No sales found for selected period."
+"Supplier information unavailable."
+
+============================================================
+37. FRONTEND DESIGN SYSTEM
+============================================================
+
+Create reusable:
+
+StatCard
+SectionHeader
+Badge
+DataTable
+ChartCard
+RiskBadge
+RecommendationCard
+AgentMessage
+ConfidenceIndicator
+EmptyState
+ErrorState
+LoadingSkeleton
+Drawer
+Modal
+ApprovalDialog
+
+Do not duplicate UI logic.
+
+============================================================
+38. VISUAL QUALITY
+============================================================
+
+Use the current visual direction as a base:
+
+emerald
+dark green
+white
+soft mint
+
+Improve:
+
+spacing
+typography
+hierarchy
+alignment
+charts
+responsive behavior
+table readability
+
+Reduce:
+
+excessive giant cards
+blank space
+decorative boxes
+unnecessary borders
+
+Every visual component should communicate information.
+
+============================================================
+39. RESPONSIVE
+============================================================
+
+Verify:
+
+1440
+1280
+1024
+768
+390
+360
+
+No:
+
+horizontal overflow
+broken sidebar
+clipped chart
+broken modal
+unusable table
+
+============================================================
+40. PERFORMANCE
+============================================================
+
+Do not:
+
+- load full datasets into frontend
+- send raw millions of rows to LLM
+- calculate everything on every page render
+
+Use:
+
+SQL aggregation
+pagination
+caching
+background jobs
+batch inference
+
+============================================================
+41. OBSERVABILITY
+============================================================
+
+Track:
+
+API latency
+error rates
+forecast calls
+agent calls
+tool calls
+recommendations
+approvals
+POs
+OCR
+dataset ingestion
+data-quality failures
+
+============================================================
+42. TESTING
+============================================================
+
+Write/repair:
+
+unit tests
+integration tests
+ML tests
+agent tests
+E2E tests
+
+Critical E2E:
+
+DATA
+↓
+FORECAST
+↓
+RISK
+↓
+FESTIVAL
+↓
+SUPPLIER
+↓
+REORDER
+↓
+AGENT
+↓
+APPROVAL
+↓
+PO
+↓
+AUDIT
+
+============================================================
+43. FINAL DEMO SCENARIO
+============================================================
+
+Create a deterministic demo scenario using actual application logic.
+
+Example:
+
+A product's inventory decreases.
+
+Forecast predicts rising demand.
+
+A festival is approaching.
+
+Festival model detects historical uplift.
+
+Supplier has a known lead time and MOQ.
+
+Reorder engine calculates quantity.
+
+Agent explains:
+
+why it is risky
+what evidence supports it
+why the quantity is recommended
+
+Manager:
+
+Modify
+
+then:
+
+Approve
+
+System:
+
+creates supplier PO
+
+Audit:
+
+records the entire workflow.
+
+No hardcoded magic number.
+
+============================================================
+44. LANDING PAGE DATA INTEGRATION
+============================================================
+
+The landing page must pull live summary information only where appropriate.
+
+Possible live cards:
+
+Current Products Tracked
+Current Stores
+Current Suppliers
+Current High-Risk SKUs
+
+If no production data exists:
+
+label the environment:
+
+"Demo Environment"
+
+Do not present demo metrics as business outcomes.
+
+============================================================
+45. LANDING PAGE CTA FLOW
+============================================================
+
+"Explore Platform"
+→ Dashboard
+
+"See How It Works"
+→ workflow section
+
+"View Demo"
+→ actual demo environment
+
+"Get Started"
+→ authenticated onboarding/setup
+
+Do not make buttons decorative.
+
+============================================================
+46. ONBOARDING
+============================================================
+
+Create a simple first-run experience:
+
+1. Create/select store
+2. Import data
+3. Validate data
+4. Configure suppliers
+5. Configure festivals
+6. Train/activate model
+7. View first recommendations
+
+The manager should understand the system quickly.
+
+============================================================
+47. PRODUCTION QUALITY
+============================================================
+
+The final application must be:
+
+- real
+- maintainable
+- testable
+- scalable
+- secure
+- observable
+- documented
+- Dockerized
+
+No fake implementations.
+
+No placeholder APIs.
+
+No hardcoded metrics.
+
+No hidden errors.
+
+============================================================
+48. AFTER ALL CHANGES
+============================================================
+
+Run:
+
+pytest
+
+Run backend.
+
+Run frontend.
+
+Run:
+
+python scripts/download_datasets.py
+
+Then:
+
+python scripts/generate_prototype_data.py --seed 42
+
+Then:
+
+python scripts/seed_demo.py
+
+Train:
+
+python -m ml.training.train_all
+
+Evaluate:
+
+python -m ml.evaluation.evaluate_all
+
+Run the E2E scenario.
+
+Open every page.
+
+============================================================
+49. FINAL AUDIT REPORT
+============================================================
+
+Create:
+
+docs/FINAL_AUDIT_REPORT.md
+
+Include:
+
+1. original problems
+2. root causes
+3. fixes
+4. models trained
+5. datasets used
+6. dataset fallbacks
+7. model metrics
+8. agent tools
+9. UI improvements
+10. workflow improvements
+11. security
+12. tests
+13. deployment
+14. known limitations
+
+Be honest.
+
+Never claim:
+
+100% accuracy
+perfect predictions
+fully autonomous purchasing
+
+without measured evidence.
+
+============================================================
+50. FINAL DEFINITION OF DONE
+============================================================
+
+The product is complete only when:
+
+- landing page works
+- landing CTA works
+- dashboard uses real data
+- analytics uses real data
+- date filters work
+- inventory works
+- risk works
+- forecast works
+- 7/14/30-day forecast works
+- multiple candidate models are evaluated
+- best model can be selected
+- model registry works
+- stockout model works where labels allow
+- overstock works
+- fast/slow works
+- ABC-XYZ works
+- festivals work
+- festival uplift is evidence-based
+- suppliers work
+- reorder optimization works
+- LLM tool calling works
+- agent responses are grounded
+- recommendation workflow works
+- human approval works
+- PO generation works
+- GST works
+- bill scanner is safely isolated/functional
+- audit works
+- data sources are deduplicated
+- health checks work
+- authentication works
+- RBAC works
+- tests pass
+- Docker works
+- dataset fallback works
+- documentation is updated
+
+============================================================
+FINAL INSTRUCTION
+============================================================
+
+DO NOT optimize only for screenshots.
+
+Optimize for:
+
+REAL DATA
++
+REAL ML
++
+REAL AGENT
++
+REAL WORKFLOW
++
+REAL BUSINESS LOGIC
++
+REAL UX
+
+The current application is a foundation.
+
+Your task is to turn it into a polished, credible, production-oriented Agentic AI inventory platform.
+
+Every visible feature must connect to a working backend capability.
+
+Every business number must have a source.
+
+Every AI decision must have evidence.
+
+Every financial action must require appropriate human authorization.

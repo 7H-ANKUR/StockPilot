@@ -1,0 +1,1884 @@
+     1→MASTER PROMPT — FINAL PRODUCT POLISH + FULL SYSTEM INTEGRATION
+     2→
+     3→You are the lead product engineer, senior frontend engineer, backend engineer, ML engineer, Agentic AI engineer, UX designer, and production architect for the project:
+     4→
+     5→AI INVENTORY DECISION AGENT
+     6→
+     7→LIVE APPLICATION:
+     8→https://inventory1222.space-z.ai/
+     9→
+    10→You are NOT starting from scratch.
+    11→
+    12→You are improving the existing implementation.
+    13→
+    14→============================================================
+    15→1. FIRST — INSPECT EVERYTHING
+    16→============================================================
+    17→
+    18→Before changing code:
+    19→
+    20→1. Open and inspect the current deployed application:
+    21→   https://inventory1222.space-z.ai/
+    22→
+    23→2. Inspect every page and interaction.
+    24→
+    25→3. Read these project specification files from the repository:
+    26→
+    27→   - PRD.md
+    28→   - MVP Tech Doc.md
+    29→   - system Design.md
+    30→   - Architecture.md
+    31→
+    32→4. Inspect the entire existing source tree.
+    33→
+    34→5. Inspect:
+    35→   - frontend components
+    36→   - backend routes
+    37→   - database schema
+    38→   - migrations
+    39→   - seed scripts
+    40→   - ingestion code
+    41→   - ML code
+    42→   - model registry
+    43→   - agent implementation
+    44→   - tool calling
+    45→   - recommendation engine
+    46→   - supplier logic
+    47→   - PO generation
+    48→   - GST
+    49→   - analytics
+    50→   - audit logs
+    51→   - data-source registry
+    52→   - deployment configuration
+    53→
+    54→Do not immediately edit code.
+    55→
+    56→First create:
+    57→
+    58→docs/CURRENT_SYSTEM_AUDIT.md
+    59→
+    60→with:
+    61→
+    62→- current feature
+    63→- current implementation
+    64→- problems
+    65→- root cause
+    66→- severity
+    67→- required fix
+    68→- affected files
+    69→- verification method
+    70→
+    71→============================================================
+    72→2. VERY IMPORTANT — THIS IS NOT ONLY A UI TASK
+    73→============================================================
+    74→
+    75→The existing screenshots show that some pages look functional but the underlying data flow is incomplete.
+    76→
+    77→Examples of observed issues include:
+    78→
+    79→- Avg Order Value showing ₹0 while revenue and transactions are non-zero
+    80→- "Last 30 days" showing ₹0 despite transactions existing
+    81→- analytics charts empty
+    82→- forecast values of 0
+    83→- lead-time demand of 0
+    84→- 999 days coverage used for unknown demand
+    85→- recommendations generated even when forecast data is unavailable
+    86→- only one model visible in the model registry
+    87→- model metrics showing 0.00
+    88→- 0 agent tool calls but 100% success rate
+    89→- duplicated data-source entries
+    90→- festival analysis too shallow
+    91→- pages do not form a strong end-to-end operational workflow
+    92→- dashboard looks like a collection of cards instead of a decision center
+    93→
+    94→Do NOT merely redesign these screens.
+    95→
+    96→Find and fix the underlying causes.
+    97→
+    98→============================================================
+    99→3. PRODUCT VISION
+   100→============================================================
+   101→
+   102→The final product must communicate one clear idea:
+   103→
+   104→EXISTING RETAIL SYSTEMS GENERATE DATA.
+   105→
+   106→AI INVENTORY DECISION AGENT
+   107→turns that data into decisions.
+   108→
+   109→The core flow:
+   110→
+   111→DATA
+   112→↓
+   113→FORECAST
+   114→↓
+   115→RISK
+   116→↓
+   117→FESTIVAL INTELLIGENCE
+   118→↓
+   119→SUPPLIER CONSTRAINTS
+   120→↓
+   121→REORDER OPTIMIZATION
+   122→↓
+   123→LLM REASONING
+   124→↓
+   125→EXPLAINABLE RECOMMENDATION
+   126→↓
+   127→MANAGER APPROVAL
+   128→↓
+   129→PURCHASE ORDER
+   130→
+   131→This is an intelligence layer.
+   132→
+   133→It is NOT:
+   134→
+   135→- a POS replacement
+   136→- a generic chatbot
+   137→- fake AI
+   138→- a simple sales dashboard
+   139→- autonomous purchasing without approval
+   140→
+   141→============================================================
+   142→4. LANDING PAGE — REDESIGN IT AS A REAL PRODUCT LANDING PAGE
+   143→============================================================
+   144→
+   145→The landing page should look like a high-quality modern SaaS/product website.
+   146→
+   147→Visual direction:
+   148→
+   149→- clean
+   150→- premium
+   151→- minimal
+   152→- white + very light green
+   153→- emerald green accents
+   154→- dark typography
+   155→- subtle gradients
+   156→- soft shadows
+   157→- strong whitespace
+   158→- professional typography
+   159→- polished responsive layout
+   160→
+   161→Do NOT make it resemble an ordinary admin dashboard.
+   162→
+   163→The landing page must sell the PRODUCT.
+   164→
+   165→============================================================
+   166→5. LANDING PAGE STRUCTURE
+   167→============================================================
+   168→
+   169→Create:
+   170→
+   171→------------------------------------------------------------
+   172→NAVBAR
+   173→------------------------------------------------------------
+   174→
+   175→Left:
+   176→
+   177→AI Inventory
+   178→Decision Agent
+   179→
+   180→Right:
+   181→
+   182→Product
+   183→How It Works
+   184→AI Intelligence
+   185→Features
+   186→Get Started
+   187→
+   188→Optional:
+   189→
+   190→Sign In
+   191→
+   192→------------------------------------------------------------
+   193→HERO
+   194→------------------------------------------------------------
+   195→
+   196→Main headline:
+   197→
+   198→"Turn Retail Data Into Better Inventory Decisions."
+   199→
+   200→Supporting text:
+   201→
+   202→"An Agentic AI layer for Indian retail — forecasting demand, preventing stockouts, understanding festival-driven demand, optimizing reorders, and preparing supplier-ready purchase orders with manager approval."
+   203→
+   204→Primary CTA:
+   205→
+   206→"Explore Platform"
+   207→
+   208→Secondary CTA:
+   209→
+   210→"See How It Works"
+   211→
+   212→------------------------------------------------------------
+   213→HERO PRODUCT VISUAL
+   214→------------------------------------------------------------
+   215→
+   216→The main hero must contain a high-quality dashboard/product mockup.
+   217→
+   218→Do not use a random decorative image.
+   219→
+   220→Show a realistic application state with:
+   221→
+   222→- revenue
+   223→- units sold
+   224→- stockout risk
+   225→- recommendations
+   226→- forecast
+   227→- festival impact
+   228→- agent insight
+   229→
+   230→The dashboard visual should look like the actual application.
+   231→
+   232→DO NOT invent unrelated fake screens.
+   233→
+   234→------------------------------------------------------------
+   235→TRUST / VALUE STRIP
+   236→------------------------------------------------------------
+   237→
+   238→Show four core capabilities:
+   239→
+   240→Demand Forecasting
+   241→Stockout Prevention
+   242→Smart Reorders
+   243→Festival Intelligence
+   244→
+   245→------------------------------------------------------------
+   246→HOW IT WORKS
+   247→------------------------------------------------------------
+   248→
+   249→Visually show:
+   250→
+   251→01
+   252→Forecast
+   253→
+   254→02
+   255→Detect Risk
+   256→
+   257→03
+   258→Reason
+   259→
+   260→04
+   261→Approve
+   262→
+   263→05
+   264→Procure
+   265→
+   266→------------------------------------------------------------
+   267→AI SECTION
+   268→------------------------------------------------------------
+   269→
+   270→Explain the difference between:
+   271→
+   272→ML models
+   273→Deterministic inventory engine
+   274→LLM agent
+   275→
+   276→Use wording like:
+   277→
+   278→"Models predict.
+   279→Rules constrain.
+   280→The agent reasons.
+   281→Managers decide."
+   282→
+   283→------------------------------------------------------------
+   284→FINAL CTA
+   285→------------------------------------------------------------
+   286→
+   287→"Make every inventory decision with evidence."
+   288→
+   289→Button:
+   290→
+   291→"Open Dashboard"
+   292→
+   293→============================================================
+   294→6. DO NOT DISPLAY FAKE BUSINESS CLAIMS
+   295→============================================================
+   296→
+   297→The current landing page contains numbers such as:
+   298→
+   299→₹51.2L
+   300→18.4K units
+   301→13 high-risk SKUs
+   302→Diwali +37%
+   303→31% stockout reduction
+   304→
+   305→These must NOT be presented as real-world business achievements unless they come from actual measured application data.
+   306→
+   307→There are only three acceptable options:
+   308→
+   309→OPTION A:
+   310→Load them dynamically from the real backend.
+   311→
+   312→OPTION B:
+   313→Label them explicitly:
+   314→
+   315→"Demo Data"
+   316→
+   317→or:
+   318→
+   319→"Example Scenario"
+   320→
+   321→OPTION C:
+   322→Remove the number.
+   323→
+   324→Never imply:
+   325→
+   326→"35% stockout reduction"
+   327→
+   328→unless the application has actually measured it.
+   329→
+   330→Never imply:
+   331→
+   332→"Trusted by 500 stores"
+   333→
+   334→unless this is genuinely true.
+   335→
+   336→Never invent customer logos.
+   337→
+   338→Never invent performance statistics.
+   339→
+   340→============================================================
+   341→7. DASHBOARD — TURN IT INTO A DECISION CENTER
+   342→============================================================
+   343→
+   344→The dashboard is currently too card-heavy.
+   345→
+   346→Redesign around manager decisions.
+   347→
+   348→Top:
+   349→
+   350→Good morning / afternoon, Manager
+   351→
+   352→Store selector
+   353→Date range
+   354→System health
+   355→
+   356→------------------------------------------------------------
+   357→KEY BUSINESS METRICS
+   358→------------------------------------------------------------
+   359→
+   360→Revenue
+   361→Transactions
+   362→Units Sold
+   363→Inventory Value
+   364→
+   365→------------------------------------------------------------
+   366→AI RISK SUMMARY
+   367→------------------------------------------------------------
+   368→
+   369→Critical Stockouts
+   370→High Risk
+   371→Overstock
+   372→Pending Reviews
+   373→
+   374→------------------------------------------------------------
+   375→DEMAND INTELLIGENCE
+   376→------------------------------------------------------------
+   377→
+   378→Actual Sales
+   379→Forecast
+   380→Trend
+   381→Confidence
+   382→
+   383→Use a meaningful chart.
+   384→
+   385→------------------------------------------------------------
+   386→FESTIVAL INTELLIGENCE
+   387→------------------------------------------------------------
+   388→
+   389→Upcoming Festival
+   390→
+   391→Expected Demand Change
+   392→
+   393→Affected Categories
+   394→
+   395→Affected SKUs
+   396→
+   397→Confidence
+   398→
+   399→------------------------------------------------------------
+   400→ACTION CENTER
+   401→------------------------------------------------------------
+   402→
+   403→Instead of simply showing numbers:
+   404→
+   405→"13 products need immediate review"
+   406→
+   407→"4 products show festival-driven demand increase"
+   408→
+   409→"8 products have excess inventory"
+   410→
+   411→Each should have:
+   412→
+   413→[Review]
+   414→
+   415→and navigate to the correct workflow.
+   416→
+   417→------------------------------------------------------------
+   418→AI DAILY BRIEF
+   419→------------------------------------------------------------
+   420→
+   421→Show a concise LLM-generated summary from REAL tool outputs.
+   422→
+   423→Example:
+   424→
+   425→"Inventory risk increased today because 13 SKUs are below lead-time coverage. Four of those SKUs also show elevated festival demand."
+   426→
+   427→Every number must come from backend data.
+   428→
+   429→============================================================
+   430→8. ANALYTICS — FIX THE DATA PIPELINE
+   431→============================================================
+   432→
+   433→Current analytics has values like:
+   434→
+   435→Revenue = ₹0
+   436→Transactions = 0
+   437→Units = 0
+   438→
+   439→while other pages show transaction data.
+   440→
+   441→Find the root cause.
+   442→
+   443→Audit:
+   444→
+   445→- SQL
+   446→- date filtering
+   447→- time zones
+   448→- timestamp parsing
+   449→- frontend parameters
+   450→- backend date handling
+   451→- aggregation
+   452→- joins
+   453→
+   454→Use one centralized date utility.
+   455→
+   456→Business timezone:
+   457→
+   458→Asia/Kolkata
+   459→
+   460→Implement correctly:
+   461→
+   462→7D
+   463→30D
+   464→90D
+   465→1Y
+   466→
+   467→Calculate:
+   468→
+   469→Revenue:
+   470→SUM(net_sales)
+   471→
+   472→Transactions:
+   473→COUNT(DISTINCT sale_id)
+   474→
+   475→Units:
+   476→SUM(quantity)
+   477→
+   478→AOV:
+   479→Revenue / Transactions
+   480→
+   481→Never return ₹0 merely because a query failed.
+   482→
+   483→Distinguish:
+   484→
+   485→0
+   486→NULL
+   487→Unavailable
+   488→No Data
+   489→
+   490→============================================================
+   491→9. CHARTS
+   492→============================================================
+   493→
+   494→Every chart must be real.
+   495→
+   496→Required:
+   497→
+   498→Revenue Trend
+   499→Units Sold Trend
+   500→Revenue by Category
+   501→Revenue by Region/Store
+   502→Top Products
+   503→Demand Forecast
+   504→
+   505→If data exists, chart it.
+   506→
+   507→If no data exists:
+   508→
+   509→show:
+   510→
+   511→"No data available for this period."
+   512→
+   513→Do not show an empty white chart box.
+   514→
+   515→============================================================
+   516→10. INVENTORY PAGE
+   517→============================================================
+   518→
+   519→Keep:
+   520→
+   521→search
+   522→category filter
+   523→risk filter
+   524→
+   525→Add:
+   526→
+   527→Store filter
+   528→Movement class
+   529→ABC-XYZ
+   530→Supplier
+   531→Days of inventory
+   532→
+   533→Inventory table:
+   534→
+   535→SKU
+   536→Product
+   537→Category
+   538→Stock
+   539→On Order
+   540→Daily Demand
+   541→Days of Inventory
+   542→Risk
+   543→Supplier
+   544→Forecast
+   545→
+   546→Clicking a row opens Product Detail.
+   547→
+   548→============================================================
+   549→11. PRODUCT DETAIL
+   550→============================================================
+   551→
+   552→Create a strong central Product Detail experience.
+   553→
+   554→Sections:
+   555→
+   556→Overview
+   557→
+   558→Inventory
+   559→
+   560→Historical Sales
+   561→
+   562→Forecast
+   563→
+   564→Risk
+   565→
+   566→Festival Impact
+   567→
+   568→Supplier
+   569→
+   570→Purchase History
+   571→
+   572→Recommendations
+   573→
+   574→GST
+   575→
+   576→Example:
+   577→
+   578→MILK 500ML
+   579→
+   580→Current Stock: 80
+   581→On Order: 0
+   582→Daily Demand: 65
+   583→Forecast 7D: 455
+   584→
+   585→Stockout probability: 87%
+   586→
+   587→Lead Time: 3 days
+   588→
+   589→Supplier:
+   590→ABC Foods
+   591→
+   592→MOQ:
+   593→50
+   594→
+   595→Festival Impact:
+   596→+12%
+   597→Confidence: 78%
+   598→
+   599→Recommendation:
+   600→Order 250
+   601→
+   602→Why:
+   603→Current inventory does not cover projected demand during supplier lead time.
+   604→
+   605→============================================================
+   606→12. RISK MONITOR — FIX UNKNOWN VALUES
+   607→============================================================
+   608→
+   609→Current system displays:
+   610→
+   611→LT Demand = 0
+   612→Daily Demand = 0
+   613→Days = 999
+   614→
+   615→This is wrong when demand is unknown.
+   616→
+   617→Use null/unknown internally.
+   618→
+   619→UI states:
+   620→
+   621→Forecast Available
+   622→Forecast Unavailable
+   623→
+   624→Demand = 0 only when it is genuinely zero.
+   625→
+   626→Do NOT use 999 to represent infinite/unknown.
+   627→
+   628→If:
+   629→
+   630→forecast unavailable
+   631→
+   632→display:
+   633→
+   634→"Forecast unavailable"
+   635→
+   636→and do not generate a false reorder recommendation.
+   637→
+   638→============================================================
+   639→13. OVERSTOCK
+   640→============================================================
+   641→
+   642→Current overstock logic can interpret:
+   643→
+   644→Daily Demand = 0
+   645→
+   646→as:
+   647→
+   648→Days = 999
+   649→
+   650→Fix it.
+   651→
+   652→If demand is unavailable:
+   653→
+   654→NO_DEMAND_SIGNAL
+   655→
+   656→If historical demand is genuinely near zero:
+   657→
+   658→VERY_SLOW
+   659→
+   660→If inventory exceeds expected coverage:
+   661→
+   662→OVERSTOCK
+   663→
+   664→Explain why.
+   665→
+   666→============================================================
+   667→14. MODEL REGISTRY — CRITICAL
+   668→============================================================
+   669→
+   670→The current system displays only:
+   671→
+   672→RidgeRegressionDemandForecast
+   673→
+   674→That is insufficient.
+   675→
+   676→Create a real model registry.
+   677→
+   678→------------------------------------------------------------
+   679→DEMAND FORECASTING
+   680→------------------------------------------------------------
+   681→
+   682→Train candidates:
+   683→
+   684→1. Naive Baseline
+   685→2. Ridge Regression
+   686→3. Random Forest
+   687→4. Gradient Boosting
+   688→5. LightGBM or XGBoost if available
+   689→
+   690→Evaluate all candidates using the SAME chronological validation data.
+   691→
+   692→Example:
+   693→
+   694→MODEL
+   695→Naive
+   696→Ridge
+   697→Random Forest
+   698→Gradient Boosting
+   699→LightGBM
+   700→
+   701→Metrics:
+   702→
+   703→MAE
+   704→RMSE
+   705→WAPE
+   706→SMAPE where applicable
+   707→
+   708→Compare:
+   709→
+   710→Model MAE
+   711→Baseline MAE
+   712→Improvement vs Baseline
+   713→
+   714→Select best valid model.
+   715→
+   716→------------------------------------------------------------
+   717→STOCKOUT RISK
+   718→------------------------------------------------------------
+   719→
+   720→Use:
+   721→
+   722→Deterministic Coverage Engine
+   723→
+   724→+
+   725→
+   726→ML classification model where reliable labels exist.
+   727→
+   728→Metrics:
+   729→
+   730→Precision
+   731→Recall
+   732→F1
+   733→ROC-AUC
+   734→PR-AUC
+   735→Calibration
+   736→
+   737→------------------------------------------------------------
+   738→MOVEMENT
+   739→------------------------------------------------------------
+   740→
+   741→Fast
+   742→Normal
+   743→Slow
+   744→
+   745→ABC-XYZ
+   746→
+   747→------------------------------------------------------------
+   748→FESTIVAL INTELLIGENCE
+   749→------------------------------------------------------------
+   750→
+   751→Historical uplift model.
+   752→
+   753→Show:
+   754→
+   755→sample size
+   756→uplift
+   757→confidence
+   758→validation period
+   759→
+   760→============================================================
+   761→15. INVALID MODEL METRICS
+   762→============================================================
+   763→
+   764→Current:
+   765→
+   766→MAE = 0
+   767→RMSE = 0
+   768→Baseline = 0
+   769→
+   770→Do not accept these without verifying the evaluation.
+   771→
+   772→Check:
+   773→
+   774→- validation set not empty
+   775→- target variance
+   776→- correct target
+   777→- no data leakage
+   778→- predictions not accidentally copied from targets
+   779→- proper chronological split
+   780→- correct joins
+   781→
+   782→If invalid:
+   783→
+   784→MODEL STATUS = FAILED
+   785→
+   786→Do not activate it.
+   787→
+   788→Never hide evaluation errors.
+   789→
+   790→============================================================
+   791→16. MODEL HEALTH
+   792→============================================================
+   793→
+   794→The page should show:
+   795→
+   796→------------------------------------------------
+   797→Demand Forecasting
+   798→
+   799→Active Model
+   800→Candidate Models
+   801→Training Dataset
+   802→Feature Version
+   803→Training Date
+   804→MAE
+   805→RMSE
+   806→WAPE
+   807→Baseline WAPE
+   808→Improvement
+   809→
+   810→------------------------------------------------
+   811→Stockout Risk
+   812→
+   813→Active Model
+   814→Precision
+   815→Recall
+   816→F1
+   817→ROC-AUC
+   818→Calibration
+   819→
+   820→------------------------------------------------
+   821→Festival Intelligence
+   822→
+   823→Evidence
+   824→Sample Size
+   825→Average Uplift
+   826→Confidence
+   827→
+   828→------------------------------------------------
+   829→Agent
+   830→
+   831→Tool Calls
+   832→Successful
+   833→Failed
+   834→Average Latency
+   835→------------------------------------------------
+   836→
+   837→If:
+   838→
+   839→total tool calls = 0
+   840→
+   841→then:
+   842→
+   843→Success Rate = N/A
+   844→
+   845→NOT:
+   846→
+   847→100%
+   848→
+   849→============================================================
+   850→17. FORECASTING PAGE
+   851→============================================================
+   852→
+   853→Build an actual forecasting workspace.
+   854→
+   855→Controls:
+   856→
+   857→Product
+   858→Store
+   859→7D
+   860→14D
+   861→30D
+   862→
+   863→Show:
+   864→
+   865→historical sales
+   866→future forecast
+   867→confidence interval
+   868→seasonality
+   869→promotion
+   870→festival markers
+   871→model version
+   872→
+   873→Chart:
+   874→
+   875→Actual
+   876→Forecast
+   877→Upper bound
+   878→Lower bound
+   879→
+   880→Below chart:
+   881→
+   882→FORECAST QUALITY
+   883→
+   884→MAE
+   885→RMSE
+   886→WAPE
+   887→
+   888→Then:
+   889→
+   890→INVENTORY IMPACT
+   891→
+   892→Current stock
+   893→Forecast
+   894→Lead time
+   895→Risk
+   896→
+   897→============================================================
+   898→18. FESTIVAL PAGE
+   899→============================================================
+   900→
+   901→The current Festival page is too simple.
+   902→
+   903→Redesign it.
+   904→
+   905→Left:
+   906→
+   907→Upcoming festivals
+   908→
+   909→Right:
+   910→
+   911→Selected festival intelligence
+   912→
+   913→Example:
+   914→
+   915→DIWALI
+   916→
+   917→Date
+   918→Region
+   919→Type
+   920→
+   921→Historical Evidence
+   922→
+   923→Baseline Demand
+   924→Festival Demand
+   925→Observed Uplift
+   926→Confidence
+   927→Sample Size
+   928→
+   929→Affected Categories
+   930→
+   931→Affected Products
+   932→
+   933→Inventory Risk
+   934→
+   935→Recommended Additional Coverage
+   936→
+   937→Do not hardcode festival demand percentages.
+   938→
+   939→Calculate them.
+   940→
+   941→============================================================
+   942→19. FESTIVAL MODEL
+   943→============================================================
+   944→
+   945→For each product:
+   946→
+   947→Matched festival period
+   948→versus
+   949→matched non-festival baseline
+   950→
+   951→Calculate:
+   952→
+   953→uplift = festival demand / baseline demand - 1
+   954→
+   955→Then adjust for:
+   956→
+   957→- recent trend
+   958→- promotion
+   959→- region
+   960→- seasonality
+   961→
+   962→If insufficient evidence:
+   963→
+   964→confidence = LOW
+   965→
+   966→and:
+   967→
+   968→"Insufficient historical evidence"
+   969→
+   970→Do not fabricate uplift.
+   971→
+   972→============================================================
+   973→20. RECOMMENDATIONS
+   974→============================================================
+   975→
+   976→Recommendations must show a decision trail.
+   977→
+   978→Example:
+   979→
+   980→PRODUCT
+   981→Milk 500ml
+   982→
+   983→RISK
+   984→CRITICAL
+   985→
+   986→CURRENT STOCK
+   987→80
+   988→
+   989→FORECAST 7D
+   990→455
+   991→
+   992→LEAD TIME
+   993→3 days
+   994→
+   995→LEAD TIME DEMAND
+   996→195
+   997→
+   998→SAFETY STOCK
+   999→60
+  1000→
+  1001→ON ORDER
+  1002→0
+  1003→
+  1004→MOQ
+  1005→50
+  1006→
+  1007→FESTIVAL IMPACT
+  1008→+12%
+  1009→
+  1010→RECOMMENDED
+  1011→250
+  1012→
+  1013→ESTIMATED COST
+  1014→₹7,000
+  1015→
+  1016→------------------------------------------------
+  1017→WHY?
+  1018→------------------------------------------------
+  1019→
+  1020→Show evidence.
+  1021→
+  1022→Then:
+  1023→
+  1024→[Approve]
+  1025→[Modify]
+  1026→[Reject]
+  1027→
+  1028→[View Full Analysis]
+  1029→
+  1030→============================================================
+  1031→21. RECOMMENDATION SAFETY
+  1032→============================================================
+  1033→
+  1034→If forecast is unavailable:
+  1035→
+  1036→DO NOT automatically use:
+  1037→
+  1038→MOQ
+  1039→
+  1040→as recommendation.
+  1041→
+  1042→Instead:
+  1043→
+  1044→FORECAST_REQUIRED
+  1045→
+  1046→or a clearly labelled baseline fallback.
+  1047→
+  1048→Financial recommendations need evidence.
+  1049→
+  1050→============================================================
+  1051→22. PURCHASE ORDER FLOW
+  1052→============================================================
+  1053→
+  1054→Correct flow:
+  1055→
+  1056→Risk
+  1057→↓
+  1058→Forecast
+  1059→↓
+  1060→Recommendation
+  1061→↓
+  1062→Manager Review
+  1063→↓
+  1064→Approve / Modify / Reject
+  1065→↓
+  1066→Approved
+  1067→↓
+  1068→Group By Supplier
+  1069→↓
+  1070→Validate
+  1071→↓
+  1072→PO Draft
+  1073→↓
+  1074→PO Generated
+  1075→
+  1076→Never generate a PO from:
+  1077→
+  1078→PENDING
+  1079→REJECTED
+  1080→FORECAST_REQUIRED
+  1081→
+  1082→============================================================
+  1083→23. SUPPLIER EXPERIENCE
+  1084→============================================================
+  1085→
+  1086→Current supplier page is structurally good but expand it.
+  1087→
+  1088→Supplier page:
+  1089→
+  1090→Total Suppliers
+  1091→Average Lead Time
+  1092→Reliability
+  1093→Pending POs
+  1094→Open Value
+  1095→
+  1096→Supplier detail:
+  1097→
+  1098→Profile
+  1099→GSTIN
+  1100→Lead Time
+  1101→MOQ
+  1102→Reliability
+  1103→Products
+  1104→Purchase History
+  1105→Delivery Performance
+  1106→Price History
+  1107→
+  1108→Use supplier data for actual reorder decisions.
+  1109→
+  1110→============================================================
+  1111→24. AGENT CHAT — REAL AGENT
+  1112→============================================================
+  1113→
+  1114→Do not call the system an agent merely because the page says:
+  1115→
+  1116→"Tool-calling LLM."
+  1117→
+  1118→Actually implement tool calling.
+  1119→
+  1120→Tools:
+  1121→
+  1122→get_sales_summary
+  1123→get_inventory_snapshot
+  1124→forecast_demand
+  1125→get_stockout_risk
+  1126→get_overstock_risk
+  1127→get_movement_classification
+  1128→analyze_festival_impact
+  1129→get_supplier_constraints
+  1130→get_product_details
+  1131→calculate_reorder_quantity
+  1132→create_purchase_order_draft
+  1133→validate_purchase_order
+  1134→
+  1135→Example:
+  1136→
+  1137→USER:
+  1138→
+  1139→"What should I reorder today?"
+  1140→
+  1141→AGENT:
+  1142→
+  1143→1. get inventory
+  1144→2. identify risks
+  1145→3. forecast demand
+  1146→4. inspect suppliers
+  1147→5. analyze festival if relevant
+  1148→6. calculate reorder
+  1149→7. explain
+  1150→8. ask for approval
+  1151→
+  1152→Record every tool call.
+  1153→
+  1154→============================================================
+  1155→25. AGENT TOOL PERFORMANCE
+  1156→============================================================
+  1157→
+  1158→Current:
+  1159→
+  1160→Total Calls = 0
+  1161→Success Rate = 100%
+  1162→
+  1163→Fix.
+  1164→
+  1165→When zero calls:
+  1166→
+  1167→Success Rate = N/A
+  1168→
+  1169→When calls happen:
+  1170→
+  1171→Success Rate =
+  1172→Successful / Total × 100
+  1173→
+  1174→Show:
+  1175→
+  1176→Total Calls
+  1177→Successful
+  1178→Failed
+  1179→Invalid Arguments
+  1180→Average Latency
+  1181→
+  1182→Store audit events.
+  1183→
+  1184→============================================================
+  1185→26. AGENT MUST BE GROUNDED
+  1186→============================================================
+  1187→
+  1188→Every number in the LLM response must originate from tool results.
+  1189→
+  1190→Bad:
+  1191→
+  1192→"Demand will increase by 40%."
+  1193→
+  1194→unless forecast/festival tool returned that.
+  1195→
+  1196→Good:
+  1197→
+  1198→"Historical festival-window demand was 37% higher than the matched baseline."
+  1199→
+  1200→with tool evidence.
+  1201→
+  1202→The LLM must never invent:
+  1203→
+  1204→- inventory
+  1205→- price
+  1206→- supplier
+  1207→- forecast
+  1208→- MOQ
+  1209→- GST
+  1210→- risk
+  1211→
+  1212→============================================================
+  1213→27. DATA SOURCES
+  1214→============================================================
+  1215→
+  1216→Fix duplicate dataset registrations.
+  1217→
+  1218→Each dataset gets:
+  1219→
+  1220→dataset_id
+  1221→dataset_name
+  1222→source
+  1223→file
+  1224→version
+  1225→ingestion_run
+  1226→download_time
+  1227→row_count
+  1228→synthetic_flag
+  1229→checksum
+  1230→
+  1231→Running ingestion twice should not duplicate the source.
+  1232→
+  1233→Use idempotency.
+  1234→
+  1235→============================================================
+  1236→28. DATASET STRATEGY
+  1237→============================================================
+  1238→
+  1239→Use Indian datasets.
+  1240→
+  1241→Primary:
+  1242→
+  1243→Supermart Grocery Sales
+  1244→Indian Retail Sales Analytics
+  1245→BigBasket Products
+  1246→
+  1247→Secondary:
+  1248→
+  1249→Indian Superstore Sales
+  1250→SupplyStream
+  1251→Whylogs Ecommerce
+  1252→
+  1253→Use each for the intended purpose from the documentation.
+  1254→
+  1255→Do not blindly merge incompatible datasets.
+  1256→
+  1257→Create canonical transformations.
+  1258→
+  1259→============================================================
+  1260→29. DATASET DOWNLOAD
+  1261→============================================================
+  1262→
+  1263→Make the repository agent-friendly.
+  1264→
+  1265→Create:
+  1266→
+  1267→scripts/download_datasets.py
+  1268→
+  1269→It should use CLI/terminal.
+  1270→
+  1271→Indian Superstore:
+  1272→
+  1273→gh repo clone Kashb-shielah/superstore-sales-analysis \
+  1274→data/raw/indian-superstore
+  1275→
+  1276→SupplyStream:
+  1277→
+  1278→gh repo clone MMathew4788/SupplyStream-Analytics-for-Retail-Logistics \
+  1279→data/raw/supplystream
+  1280→
+  1281→Then:
+  1282→
+  1283→cd data/raw/supplystream
+  1284→python -m pip install numpy pandas faker
+  1285→python generate_data.py
+  1286→
+  1287→Whylogs:
+  1288→
+  1289→pip install "whylogs[datasets]"
+  1290→
+  1291→Load:
+  1292→
+  1293→Ecommerce(version="base")
+  1294→
+  1295→If the source is unavailable:
+  1296→
+  1297→do not stop.
+  1298→
+  1299→Run:
+  1300→
+  1301→python scripts/generate_prototype_data.py --seed 42
+  1302→
+  1303→============================================================
+  1304→30. PROTOTYPE DATA
+  1305→============================================================
+  1306→
+  1307→Synthetic data must be realistic.
+  1308→
+  1309→Generate:
+  1310→
+  1311→100+
+  1312→products
+  1313→
+  1314→5+
+  1315→stores
+  1316→
+  1317→10+
+  1318→suppliers
+  1319→
+  1320→180+
+  1321→days
+  1322→
+  1323→daily sales
+  1324→
+  1325→inventory history
+  1326→
+  1327→purchase history
+  1328→
+  1329→supplier constraints
+  1330→
+  1331→festivals
+  1332→
+  1333→GST
+  1334→
+  1335→stockouts
+  1336→
+  1337→promotions
+  1338→
+  1339→seasonality
+  1340→
+  1341→Do not make most demand values zero.
+  1342→
+  1343→Do not generate broken relationships.
+  1344→
+  1345→Validate:
+  1346→
+  1347→sales > 0 for a meaningful percentage of SKUs
+  1348→inventory varies
+  1349→sales vary
+  1350→multiple dates
+  1351→multiple stores
+  1352→multiple suppliers
+  1353→multiple festivals
+  1354→
+  1355→============================================================
+  1356→31. DATA QUALITY
+  1357→============================================================
+  1358→
+  1359→Run checks before training:
+  1360→
+  1361→- missing IDs
+  1362→- duplicate transactions
+  1363→- bad dates
+  1364→- invalid quantities
+  1365→- invalid prices
+  1366→- invalid GST
+  1367→- orphan products
+  1368→- orphan suppliers
+  1369→- missing store
+  1370→- missing supplier
+  1371→- impossible inventory values
+  1372→
+  1373→Produce:
+  1374→
+  1375→docs/DATA_QUALITY_REPORT.md
+  1376→
+  1377→============================================================
+  1378→32. DATABASE
+  1379→============================================================
+  1380→
+  1381→Audit database queries for:
+  1382→
+  1383→- duplicate joins
+  1384→- incorrect aggregations
+  1385→- missing indexes
+  1386→- incorrect foreign keys
+  1387→- duplicate rows
+  1388→
+  1389→Use migrations.
+  1390→
+  1391→Ensure ingestion is idempotent.
+  1392→
+  1393→============================================================
+  1394→33. AUTHENTICATION
+  1395→============================================================
+  1396→
+  1397→Implement real permissions.
+  1398→
+  1399→Roles:
+  1400→
+  1401→ADMIN
+  1402→OWNER
+  1403→MANAGER
+  1404→PROCUREMENT
+  1405→FINANCE
+  1406→ANALYST
+  1407→
+  1408→Server-side authorization is mandatory.
+  1409→
+  1410→Do not rely on frontend permissions.
+  1411→
+  1412→============================================================
+  1413→34. AUDIT
+  1414→============================================================
+  1415→
+  1416→Audit:
+  1417→
+  1418→recommendation creation
+  1419→approval
+  1420→modification
+  1421→rejection
+  1422→PO generation
+  1423→agent tool calls
+  1424→data ingestion
+  1425→model training
+  1426→model activation
+  1427→configuration changes
+  1428→
+  1429→Store:
+  1430→
+  1431→timestamp
+  1432→user
+  1433→resource
+  1434→before
+  1435→after
+  1436→request ID
+  1437→
+  1438→============================================================
+  1439→35. HEALTH CHECKS
+  1440→============================================================
+  1441→
+  1442→Do not display "System Online" simply because the frontend loaded.
+  1443→
+  1444→Implement:
+  1445→
+  1446→/health
+  1447→/ready
+  1448→
+  1449→Health should check appropriate dependencies.
+  1450→
+  1451→Frontend should use real health state.
+  1452→
+  1453→============================================================
+  1454→36. ERROR STATES
+  1455→============================================================
+  1456→
+  1457→Every page supports:
+  1458→
+  1459→loading
+  1460→success
+  1461→empty
+  1462→error
+  1463→retry
+  1464→
+  1465→Never render empty boxes without explanation.
+  1466→
+  1467→Examples:
+  1468→
+  1469→"No forecast available."
+  1470→"No sales found for selected period."
+  1471→"Supplier information unavailable."
+  1472→
+  1473→============================================================
+  1474→37. FRONTEND DESIGN SYSTEM
+  1475→============================================================
+  1476→
+  1477→Create reusable:
+  1478→
+  1479→StatCard
+  1480→SectionHeader
+  1481→Badge
+  1482→DataTable
+  1483→ChartCard
+  1484→RiskBadge
+  1485→RecommendationCard
+  1486→AgentMessage
+  1487→ConfidenceIndicator
+  1488→EmptyState
+  1489→ErrorState
+  1490→LoadingSkeleton
+  1491→Drawer
+  1492→Modal
+  1493→ApprovalDialog
+  1494→
+  1495→Do not duplicate UI logic.
+  1496→
+  1497→============================================================
+  1498→38. VISUAL QUALITY
+  1499→============================================================
+  1500→
+  1501→Use the current visual direction as a base:
+  1502→
+  1503→emerald
+  1504→dark green
+  1505→white
+  1506→soft mint
+  1507→
+  1508→Improve:
+  1509→
+  1510→spacing
+  1511→typography
+  1512→hierarchy
+  1513→alignment
+  1514→charts
+  1515→responsive behavior
+  1516→table readability
+  1517→
+  1518→Reduce:
+  1519→
+  1520→excessive giant cards
+  1521→blank space
+  1522→decorative boxes
+  1523→unnecessary borders
+  1524→
+  1525→Every visual component should communicate information.
+  1526→
+  1527→============================================================
+  1528→39. RESPONSIVE
+  1529→============================================================
+  1530→
+  1531→Verify:
+  1532→
+  1533→1440
+  1534→1280
+  1535→1024
+  1536→768
+  1537→390
+  1538→360
+  1539→
+  1540→No:
+  1541→
+  1542→horizontal overflow
+  1543→broken sidebar
+  1544→clipped chart
+  1545→broken modal
+  1546→unusable table
+  1547→
+  1548→============================================================
+  1549→40. PERFORMANCE
+  1550→============================================================
+  1551→
+  1552→Do not:
+  1553→
+  1554→- load full datasets into frontend
+  1555→- send raw millions of rows to LLM
+  1556→- calculate everything on every page render
+  1557→
+  1558→Use:
+  1559→
+  1560→SQL aggregation
+  1561→pagination
+  1562→caching
+  1563→background jobs
+  1564→batch inference
+  1565→
+  1566→============================================================
+  1567→41. OBSERVABILITY
+  1568→============================================================
+  1569→
+  1570→Track:
+  1571→
+  1572→API latency
+  1573→error rates
+  1574→forecast calls
+  1575→agent calls
+  1576→tool calls
+  1577→recommendations
+  1578→approvals
+  1579→POs
+  1580→OCR
+  1581→dataset ingestion
+  1582→data-quality failures
+  1583→
+  1584→============================================================
+  1585→42. TESTING
+  1586→============================================================
+  1587→
+  1588→Write/repair:
+  1589→
+  1590→unit tests
+  1591→integration tests
+  1592→ML tests
+  1593→agent tests
+  1594→E2E tests
+  1595→
+  1596→Critical E2E:
+  1597→
+  1598→DATA
+  1599→↓
+  1600→FORECAST
+  1601→↓
+  1602→RISK
+  1603→↓
+  1604→FESTIVAL
+  1605→↓
+  1606→SUPPLIER
+  1607→↓
+  1608→REORDER
+  1609→↓
+  1610→AGENT
+  1611→↓
+  1612→APPROVAL
+  1613→↓
+  1614→PO
+  1615→↓
+  1616→AUDIT
+  1617→
+  1618→============================================================
+  1619→43. FINAL DEMO SCENARIO
+  1620→============================================================
+  1621→
+  1622→Create a deterministic demo scenario using actual application logic.
+  1623→
+  1624→Example:
+  1625→
+  1626→A product's inventory decreases.
+  1627→
+  1628→Forecast predicts rising demand.
+  1629→
+  1630→A festival is approaching.
+  1631→
+  1632→Festival model detects historical uplift.
+  1633→
+  1634→Supplier has a known lead time and MOQ.
+  1635→
+  1636→Reorder engine calculates quantity.
+  1637→
+  1638→Agent explains:
+  1639→
+  1640→why it is risky
+  1641→what evidence supports it
+  1642→why the quantity is recommended
+  1643→
+  1644→Manager:
+  1645→
+  1646→Modify
+  1647→
+  1648→then:
+  1649→
+  1650→Approve
+  1651→
+  1652→System:
+  1653→
+  1654→creates supplier PO
+  1655→
+  1656→Audit:
+  1657→
+  1658→records the entire workflow.
+  1659→
+  1660→No hardcoded magic number.
+  1661→
+  1662→============================================================
+  1663→44. LANDING PAGE DATA INTEGRATION
+  1664→============================================================
+  1665→
+  1666→The landing page must pull live summary information only where appropriate.
+  1667→
+  1668→Possible live cards:
+  1669→
+  1670→Current Products Tracked
+  1671→Current Stores
+  1672→Current Suppliers
+  1673→Current High-Risk SKUs
+  1674→
+  1675→If no production data exists:
+  1676→
+  1677→label the environment:
+  1678→
+  1679→"Demo Environment"
+  1680→
+  1681→Do not present demo metrics as business outcomes.
+  1682→
+  1683→============================================================
+  1684→45. LANDING PAGE CTA FLOW
+  1685→============================================================
+  1686→
+  1687→"Explore Platform"
+  1688→→ Dashboard
+  1689→
+  1690→"See How It Works"
+  1691→→ workflow section
+  1692→
+  1693→"View Demo"
+  1694→→ actual demo environment
+  1695→
+  1696→"Get Started"
+  1697→→ authenticated onboarding/setup
+  1698→
+  1699→Do not make buttons decorative.
+  1700→
+  1701→============================================================
+  1702→46. ONBOARDING
+  1703→============================================================
+  1704→
+  1705→Create a simple first-run experience:
+  1706→
+  1707→1. Create/select store
+  1708→2. Import data
+  1709→3. Validate data
+  1710→4. Configure suppliers
+  1711→5. Configure festivals
+  1712→6. Train/activate model
+  1713→7. View first recommendations
+  1714→
+  1715→The manager should understand the system quickly.
+  1716→
+  1717→============================================================
+  1718→47. PRODUCTION QUALITY
+  1719→============================================================
+  1720→
+  1721→The final application must be:
+  1722→
+  1723→- real
+  1724→- maintainable
+  1725→- testable
+  1726→- scalable
+  1727→- secure
+  1728→- observable
+  1729→- documented
+  1730→- Dockerized
+  1731→
+  1732→No fake implementations.
+  1733→
+  1734→No placeholder APIs.
+  1735→
+  1736→No hardcoded metrics.
+  1737→
+  1738→No hidden errors.
+  1739→
+  1740→============================================================
+  1741→48. AFTER ALL CHANGES
+  1742→============================================================
+  1743→
+  1744→Run:
+  1745→
+  1746→pytest
+  1747→
+  1748→Run backend.
+  1749→
+  1750→Run frontend.
+  1751→
+  1752→Run:
+  1753→
+  1754→python scripts/download_datasets.py
+  1755→
+  1756→Then:
+  1757→
+  1758→python scripts/generate_prototype_data.py --seed 42
+  1759→
+  1760→Then:
+  1761→
+  1762→python scripts/seed_demo.py
+  1763→
+  1764→Train:
+  1765→
+  1766→python -m ml.training.train_all
+  1767→
+  1768→Evaluate:
+  1769→
+  1770→python -m ml.evaluation.evaluate_all
+  1771→
+  1772→Run the E2E scenario.
+  1773→
+  1774→Open every page.
+  1775→
+  1776→============================================================
+  1777→49. FINAL AUDIT REPORT
+  1778→============================================================
+  1779→
+  1780→Create:
+  1781→
+  1782→docs/FINAL_AUDIT_REPORT.md
+  1783→
+  1784→Include:
+  1785→
+  1786→1. original problems
+  1787→2. root causes
+  1788→3. fixes
+  1789→4. models trained
+  1790→5. datasets used
+  1791→6. dataset fallbacks
+  1792→7. model metrics
+  1793→8. agent tools
+  1794→9. UI improvements
+  1795→10. workflow improvements
+  1796→11. security
+  1797→12. tests
+  1798→13. deployment
+  1799→14. known limitations
+  1800→
+  1801→Be honest.
+  1802→
+  1803→Never claim:
+  1804→
+  1805→100% accuracy
+  1806→perfect predictions
+  1807→fully autonomous purchasing
+  1808→
+  1809→without measured evidence.
+  1810→
+  1811→============================================================
+  1812→50. FINAL DEFINITION OF DONE
+  1813→============================================================
+  1814→
+  1815→The product is complete only when:
+  1816→
+  1817→- landing page works
+  1818→- landing CTA works
+  1819→- dashboard uses real data
+  1820→- analytics uses real data
+  1821→- date filters work
+  1822→- inventory works
+  1823→- risk works
+  1824→- forecast works
+  1825→- 7/14/30-day forecast works
+  1826→- multiple candidate models are evaluated
+  1827→- best model can be selected
+  1828→- model registry works
+  1829→- stockout model works where labels allow
+  1830→- overstock works
+  1831→- fast/slow works
+  1832→- ABC-XYZ works
+  1833→- festivals work
+  1834→- festival uplift is evidence-based
+  1835→- suppliers work
+  1836→- reorder optimization works
+  1837→- LLM tool calling works
+  1838→- agent responses are grounded
+  1839→- recommendation workflow works
+  1840→- human approval works
+  1841→- PO generation works
+  1842→- GST works
+  1843→- bill scanner is safely isolated/functional
+  1844→- audit works
+  1845→- data sources are deduplicated
+  1846→- health checks work
+  1847→- authentication works
+  1848→- RBAC works
+  1849→- tests pass
+  1850→- Docker works
+  1851→- dataset fallback works
+  1852→- documentation is updated
+  1853→
+  1854→============================================================
+  1855→FINAL INSTRUCTION
+  1856→============================================================
+  1857→
+  1858→DO NOT optimize only for screenshots.
+  1859→
+  1860→Optimize for:
+  1861→
+  1862→REAL DATA
+  1863→+
+  1864→REAL ML
+  1865→+
+  1866→REAL AGENT
+  1867→+
+  1868→REAL WORKFLOW
+  1869→+
+  1870→REAL BUSINESS LOGIC
+  1871→+
+  1872→REAL UX
+  1873→
+  1874→The current application is a foundation.
+  1875→
+  1876→Your task is to turn it into a polished, credible, production-oriented Agentic AI inventory platform.
+  1877→
+  1878→Every visible feature must connect to a working backend capability.
+  1879→
+  1880→Every business number must have a source.
+  1881→
+  1882→Every AI decision must have evidence.
+  1883→
+  1884→Every financial action must require appropriate human authorization.

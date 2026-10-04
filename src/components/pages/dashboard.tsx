@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
   TrendingUp, AlertTriangle, Package, IndianRupee, ShoppingCart,
-  Calendar, ArrowRight, Sparkles, AlertCircle, Zap,
+  Calendar, ArrowRight, Sparkles, AlertCircle, Zap, Brain,
 } from 'lucide-react';
 import {
   ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip,
@@ -28,6 +28,7 @@ interface DashboardData {
     stockoutHigh: number;
     stockoutWatch: number;
     overstock: number;
+    noDemandSignal: number;
     pendingApprovals: number;
     approvedRecs: number;
     pendingReorderValue: number;
@@ -36,6 +37,7 @@ interface DashboardData {
   stockoutRiskItems: any[];
   upcomingFestivals: any[];
   salesTrend: { date: string; revenue: number }[];
+  period?: { start: string; end: string };
 }
 
 const CHART_COLORS = [
@@ -361,6 +363,116 @@ export function DashboardPage({ onNavigate }: { onNavigate: (p: PageKey) => void
           </Button>
         </CardContent>
       </Card>
+
+      {/* Action Center + AI Daily Brief */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* Action Center */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Zap className="w-4 h-4 text-primary" />
+              Action Center
+            </CardTitle>
+            <CardDescription>Manager decisions requiring attention</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {k.stockoutHigh > 0 && (
+              <ActionRow
+                count={k.stockoutHigh}
+                label="products need immediate review (HIGH/CRITICAL stockout risk)"
+                action="Review"
+                onClick={() => onNavigate('risks')}
+                color="destructive"
+              />
+            )}
+            {k.overstock > 0 && (
+              <ActionRow
+                count={k.overstock}
+                label="products have excess inventory"
+                action="Review"
+                onClick={() => onNavigate('risks')}
+                color="warning"
+              />
+            )}
+            {k.pendingApprovals > 0 && (
+              <ActionRow
+                count={k.pendingApprovals}
+                label="AI recommendations pending approval"
+                action="Approve"
+                onClick={() => onNavigate('recommendations')}
+                color="primary"
+              />
+            )}
+            {data.upcomingFestivals.length > 0 && (
+              <ActionRow
+                count={data.upcomingFestivals.length}
+                label="upcoming festivals may affect demand"
+                action="Plan"
+                onClick={() => onNavigate('festivals')}
+                color="info"
+              />
+            )}
+            {k.noDemandSignal > 0 && (
+              <ActionRow
+                count={k.noDemandSignal}
+                label="products have no demand signal (review status)"
+                action="Review"
+                onClick={() => onNavigate('inventory')}
+                color="muted"
+              />
+            )}
+            {k.stockoutHigh === 0 && k.overstock === 0 && k.pendingApprovals === 0 && (
+              <div className="text-sm text-muted-foreground text-center py-8">
+                No urgent actions. Generate recommendations to scan inventory.
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* AI Daily Brief */}
+        <Card className="bg-gradient-card-success border-primary/20">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Brain className="w-4 h-4 text-primary" />
+              AI Daily Brief
+            </CardTitle>
+            <CardDescription>Generated from real tool outputs</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="text-sm leading-relaxed text-foreground space-y-2">
+              {k.stockoutHigh > 0 ? (
+                <>
+                  <p>
+                    Inventory risk increased today because <strong>{k.stockoutHigh} SKUs</strong> are below
+                    lead-time coverage. {k.pendingApprovals > 0 && ` ${k.pendingApprovals} reorder recommendations are pending your review.`}
+                  </p>
+                  {k.noDemandSignal > 0 && (
+                    <p className="text-muted-foreground">
+                      {k.noDemandSignal} products have no sales history — forecast unavailable. These need manual review before ordering.
+                    </p>
+                  )}
+                  {data.upcomingFestivals.length > 0 && (
+                    <p className="text-muted-foreground">
+                      Upcoming festival: <strong>{data.upcomingFestivals[0].name}</strong> on{' '}
+                      {new Date(data.upcomingFestivals[0].startDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}.
+                      Review festival impact on relevant categories.
+                    </p>
+                  )}
+                </>
+              ) : (
+                <p className="text-muted-foreground">
+                  No critical stockout risks detected. {k.pendingApprovals > 0 && `${k.pendingApprovals} recommendations pending approval. `}
+                  Generate new recommendations to scan inventory for emerging risks.
+                </p>
+              )}
+            </div>
+            <div className="mt-4 pt-3 border-t border-border/50 text-xs text-muted-foreground">
+              Period: {data.period ? new Date(data.period.start).toLocaleDateString('en-IN') : '—'} to{' '}
+              {data.period ? new Date(data.period.end).toLocaleDateString('en-IN') : '—'} · All numbers from backend data
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
@@ -392,5 +504,32 @@ function KpiCard({
         )}
       </CardContent>
     </Card>
+  );
+}
+
+function ActionRow({ count, label, action, onClick, color }: {
+  count: number;
+  label: string;
+  action: string;
+  onClick: () => void;
+  color: 'destructive' | 'warning' | 'primary' | 'info' | 'muted';
+}) {
+  const colorMap: Record<string, string> = {
+    destructive: 'bg-destructive/10 text-destructive border-destructive/30',
+    warning: 'bg-warning/10 text-warning border-warning/30',
+    primary: 'bg-primary/10 text-primary border-primary/30',
+    info: 'bg-info/10 text-info border-info/30',
+    muted: 'bg-muted text-muted-foreground border-border',
+  };
+  return (
+    <div className="flex items-center gap-3 p-3 rounded-md border border-border bg-card hover:bg-muted/30 transition-colors">
+      <div className={`w-10 h-10 rounded-md flex items-center justify-center font-bold tabular-nums ${colorMap[color]}`}>
+        {count}
+      </div>
+      <div className="flex-1 text-sm">{label}</div>
+      <Button size="sm" variant="outline" onClick={onClick}>
+        {action} <ArrowRight className="w-3 h-3 ml-1" />
+      </Button>
+    </div>
   );
 }

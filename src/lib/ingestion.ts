@@ -201,16 +201,13 @@ export async function ingestSupermartCSV(
   }
   
   // Record data source
-  await db.dataSource.create({
-    data: {
-      sourceName: 'Supermart Grocery Sales - Retail Analytics',
-      sourceType: 'REAL_PUBLIC',
-      sourceFile: filePath,
-      downloadTime: new Date(),
-      version: '1.0',
-      syntheticFlag: false,
-      rowCount: validRows,
-    },
+  await upsertDataSource({
+    sourceName: 'Supermart Grocery Sales - Retail Analytics',
+    sourceType: 'REAL_PUBLIC',
+    sourceFile: filePath,
+    version: '1.0',
+    syntheticFlag: false,
+    rowCount: validRows,
   });
   
   return {
@@ -295,16 +292,13 @@ export async function ingestBigBasketCSV(
     }
   }
 
-  await db.dataSource.create({
-    data: {
-      sourceName: 'BigBasket Entire Product List',
-      sourceType: 'REAL_PUBLIC',
-      sourceFile: filePath,
-      downloadTime: new Date(),
-      version: '1.0',
-      syntheticFlag: false,
-      rowCount: validRows,
-    },
+  await upsertDataSource({
+    sourceName: 'BigBasket Entire Product List',
+    sourceType: 'REAL_PUBLIC',
+    sourceFile: filePath,
+    version: '1.0',
+    syntheticFlag: false,
+    rowCount: validRows,
   });
 
   return {
@@ -436,16 +430,13 @@ export async function ingestSuperstoreXLSX(
     await db.sale.createMany({ data: salesBatch });
   }
   
-  await db.dataSource.create({
-    data: {
-      sourceName: 'Indian Superstore Sales Analysis',
-      sourceType: 'REAL_PUBLIC',
-      sourceFile: filePath,
-      downloadTime: new Date(),
-      version: '1.0',
-      syntheticFlag: false,
-      rowCount: validRows,
-    },
+  await upsertDataSource({
+    sourceName: 'Indian Superstore Sales Analysis',
+    sourceType: 'REAL_PUBLIC',
+    sourceFile: filePath,
+    version: '1.0',
+    syntheticFlag: false,
+    rowCount: validRows,
   });
   
   return {
@@ -613,6 +604,45 @@ export async function seedSuppliersAndInventory() {
 // ============================================================
 // HELPERS
 // ============================================================
+
+// Idempotent data source registration — upsert by sourceName
+// Per spec: "Running ingestion twice should not duplicate the source. Use idempotency."
+async function upsertDataSource(params: {
+  sourceName: string;
+  sourceType: string;
+  sourceFile: string;
+  version: string;
+  syntheticFlag: boolean;
+  rowCount: number;
+}) {
+  const existing = await db.dataSource.findFirst({
+    where: { sourceName: params.sourceName },
+  });
+  if (existing) {
+    await db.dataSource.update({
+      where: { id: existing.id },
+      data: {
+        sourceFile: params.sourceFile,
+        downloadTime: new Date(),
+        version: params.version,
+        syntheticFlag: params.syntheticFlag,
+        rowCount: params.rowCount,
+      },
+    });
+  } else {
+    await db.dataSource.create({
+      data: {
+        sourceName: params.sourceName,
+        sourceType: params.sourceType,
+        sourceFile: params.sourceFile,
+        downloadTime: new Date(),
+        version: params.version,
+        syntheticFlag: params.syntheticFlag,
+        rowCount: params.rowCount,
+      },
+    });
+  }
+}
 
 function getGstRateForCategory(category: string): number {
   const c = (category || '').toLowerCase();

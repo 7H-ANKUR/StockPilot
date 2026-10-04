@@ -129,7 +129,9 @@ export function RisksPage() {
                       </div>
                       <div>
                         <div className="text-muted-foreground">Days Left</div>
-                        <div className="font-medium tabular-nums text-destructive">{r.expectedDaysToStockout}</div>
+                        <div className="font-medium tabular-nums text-destructive">
+                          {r.expectedDaysToStockout === null ? 'N/A' : r.expectedDaysToStockout}
+                        </div>
                       </div>
                     </div>
                     <div className="mt-2 text-xs text-muted-foreground italic">
@@ -167,8 +169,12 @@ export function RisksPage() {
                         <div className="font-medium text-sm truncate">{r.productName}</div>
                         <div className="text-xs text-muted-foreground">{r.sku}</div>
                       </div>
-                      <Badge className="bg-warning text-warning-foreground">
-                        {r.daysOfInventory > 90 ? 'SEVERE' : 'OVERSTOCK'}
+                      <Badge className={
+                        r.classification === 'NO_DEMAND_SIGNAL' ? 'bg-muted text-muted-foreground' :
+                        r.classification === 'VERY_SLOW' ? 'bg-warning/70 text-warning-foreground' :
+                        'bg-warning text-warning-foreground'
+                      }>
+                        {r.classification || (r.daysOfInventory > 90 ? 'SEVERE' : 'OVERSTOCK')}
                       </Badge>
                     </div>
                     <div className="grid grid-cols-4 gap-2 mt-3 text-xs">
@@ -178,11 +184,15 @@ export function RisksPage() {
                       </div>
                       <div>
                         <div className="text-muted-foreground">Daily Demand</div>
-                        <div className="font-medium tabular-nums">{r.forecastDailyDemand.toFixed(1)}</div>
+                        <div className="font-medium tabular-nums">
+                          {r.forecastAvailable === false ? 'N/A' : r.forecastDailyDemand.toFixed(1)}
+                        </div>
                       </div>
                       <div>
                         <div className="text-muted-foreground">Days</div>
-                        <div className="font-medium tabular-nums text-warning">{r.daysOfInventory.toFixed(0)}</div>
+                        <div className="font-medium tabular-nums text-warning">
+                          {r.daysOfInventory === null ? 'N/A' : r.daysOfInventory.toFixed(0)}
+                        </div>
                       </div>
                       <div>
                         <div className="text-muted-foreground">Class</div>

@@ -27,13 +27,14 @@ export interface StockoutRisk {
   availableStock: number;
   reorderPoint: number;
   forecastDailyDemand: number;
+  forecastAvailable: boolean; // false when no sales history
   leadTimeDays: number;
   leadTimeDemand: number;
   safetyStock: number;
   requiredCoverage: number;
-  daysOfInventory: number;
-  expectedDaysToStockout: number;
-  riskLevel: 'SAFE' | 'WATCH' | 'HIGH' | 'CRITICAL';
+  daysOfInventory: number | null; // null when forecast unavailable
+  expectedDaysToStockout: number | null; // null when forecast unavailable
+  riskLevel: 'SAFE' | 'WATCH' | 'HIGH' | 'CRITICAL' | 'NO_DEMAND_SIGNAL';
   stockoutProbability: number;
   reason: string;
 }
@@ -44,58 +45,70 @@ export async function computeStockoutRisk(
 ): Promise<StockoutRisk> {
   const product = await db.product.findUnique({ where: { id: productId } });
   if (!product) throw new Error('Product not found');
-  
+
   const inventory = await db.inventorySnapshot.findFirst({
     where: { productId, storeId },
     orderBy: { snapshotDate: 'desc' },
   });
-  
+
   const supplierProduct = await db.supplierProduct.findFirst({
     where: { productId, preferred: true },
     include: { supplier: true },
   });
-  
+
   const supplier = supplierProduct?.supplier;
   const leadTimeDays = supplier?.leadTimeDays || 3;
-  const moq = supplier?.minOrderQty || 1;
-  
+
   const onHandQty = inventory?.onHandQty || 0;
   const reservedQty = inventory?.reservedQty || 0;
   const damagedQty = inventory?.damagedQty || 0;
   const availableStock = onHandQty - reservedQty - damagedQty;
   const reorderPoint = inventory?.reorderPoint || 0;
-  
+
   // Get daily demand series to compute forecast
   const series = await getDailySalesSeries(productId, storeId, 28);
   const recent7 = series.slice(-7).map(s => s.qty);
   const recent14 = series.slice(-14).map(s => s.qty);
-  
+
   const forecastDailyDemand = mean(recent7);
   const demandStd = std(recent14);
-  
+
+  // Determine if forecast is available (at least some sales in last 28 days)
+  const salesCount = series.filter(s => s.qty > 0).length;
+  const forecastAvailable = salesCount >= 3 && forecastDailyDemand > 0.1;
+
   // Lead-time demand
-  const leadTimeDemand = forecastDailyDemand * leadTimeDays;
+  const leadTimeDemand = forecastAvailable ? forecastDailyDemand * leadTimeDays : 0;
   // Safety stock: Z=1.65 (95% service) × σ × √LT
   const serviceFactor = 1.65;
-  const safetyStock = serviceFactor * demandStd * Math.sqrt(leadTimeDays);
+  const safetyStock = forecastAvailable ? serviceFactor * demandStd * Math.sqrt(leadTimeDays) : 0;
   // Required coverage
   const requiredCoverage = leadTimeDemand + safetyStock;
-  
-  // Days of inventory
-  const daysOfInventory = forecastDailyDemand > 0.1
+
+  // Days of inventory — NULL when forecast unavailable (not 999)
+  const daysOfInventory: number | null = forecastAvailable
     ? availableStock / forecastDailyDemand
-    : availableStock > 0 ? 999 : 0;
-  
-  // Expected days to stockout
-  const expectedDaysToStockout = forecastDailyDemand > 0.1
+    : null;
+
+  // Expected days to stockout — NULL when forecast unavailable
+  const expectedDaysToStockout: number | null = forecastAvailable
     ? Math.floor(availableStock / forecastDailyDemand)
-    : 999;
-  
+    : null;
+
   // Risk classification
   let riskLevel: StockoutRisk['riskLevel'] = 'SAFE';
   let reason = '';
-  
-  if (availableStock <= 0) {
+
+  if (!forecastAvailable) {
+    // No demand signal — can't compute meaningful risk
+    if (availableStock <= 0) {
+      riskLevel = 'CRITICAL';
+      reason = `Out of stock with no sales history. Forecast unavailable — cannot compute lead-time demand.`;
+    } else {
+      riskLevel = 'NO_DEMAND_SIGNAL';
+      reason = `No sales history in last 28 days. Cannot compute forecast — risk classification unavailable.`;
+    }
+  } else if (availableStock <= 0) {
     riskLevel = 'CRITICAL';
     reason = `Out of stock. Available (${availableStock}) is zero or negative.`;
   } else if (availableStock < leadTimeDemand) {
@@ -109,18 +122,22 @@ export async function computeStockoutRisk(
     reason = `Available stock (${availableStock.toFixed(0)}) is below reorder point (${reorderPoint}).`;
   } else {
     riskLevel = 'SAFE';
-    reason = `Available stock (${availableStock.toFixed(0)}) covers ${(daysOfInventory).toFixed(1)} days of demand.`;
+    reason = `Available stock (${availableStock.toFixed(0)}) covers ${(daysOfInventory!).toFixed(1)} days of demand.`;
   }
-  
+
   // Stockout probability (rough heuristic): increases as coverage ratio drops
-  const coverageRatio = requiredCoverage > 0 ? availableStock / requiredCoverage : 1;
+  // When forecast unavailable, probability is unknown (0 = can't assess)
   let stockoutProbability = 0;
-  if (coverageRatio < 0.5) stockoutProbability = 0.95;
-  else if (coverageRatio < 0.8) stockoutProbability = 0.75;
-  else if (coverageRatio < 1.0) stockoutProbability = 0.45;
-  else if (coverageRatio < 1.5) stockoutProbability = 0.15;
-  else stockoutProbability = 0.03;
-  
+  if (forecastAvailable) {
+    const coverageRatio = requiredCoverage > 0 ? availableStock / requiredCoverage : 1;
+    if (availableStock <= 0) stockoutProbability = 0.99;
+    else if (coverageRatio < 0.5) stockoutProbability = 0.95;
+    else if (coverageRatio < 0.8) stockoutProbability = 0.75;
+    else if (coverageRatio < 1.0) stockoutProbability = 0.45;
+    else if (coverageRatio < 1.5) stockoutProbability = 0.15;
+    else stockoutProbability = 0.03;
+  }
+
   return {
     productId,
     sku: product.sku,
@@ -129,11 +146,12 @@ export async function computeStockoutRisk(
     availableStock,
     reorderPoint,
     forecastDailyDemand: round(forecastDailyDemand, 1),
+    forecastAvailable,
     leadTimeDays,
     leadTimeDemand: round(leadTimeDemand, 1),
     safetyStock: round(safetyStock, 1),
     requiredCoverage: round(requiredCoverage, 1),
-    daysOfInventory: round(daysOfInventory, 1),
+    daysOfInventory: daysOfInventory !== null ? round(daysOfInventory, 1) : null,
     expectedDaysToStockout,
     riskLevel,
     stockoutProbability,
@@ -151,8 +169,10 @@ export interface OverstockInfo {
   productName: string;
   currentStock: number;
   forecastDailyDemand: number;
-  daysOfInventory: number;
+  forecastAvailable: boolean;
+  daysOfInventory: number | null; // null when forecast unavailable
   threshold: number;
+  classification: 'OVERSTOCK' | 'VERY_SLOW' | 'NO_DEMAND_SIGNAL' | 'HEALTHY';
   isOverstock: boolean;
   movementClass: string;
   recommendation: string;
@@ -164,31 +184,56 @@ export async function computeOverstock(
 ): Promise<OverstockInfo> {
   const product = await db.product.findUnique({ where: { id: productId } });
   if (!product) throw new Error('Product not found');
-  
+
   const inventory = await db.inventorySnapshot.findFirst({
     where: { productId, storeId },
     orderBy: { snapshotDate: 'desc' },
   });
-  
+
   const series = await getDailySalesSeries(productId, storeId, 28);
   const forecastDailyDemand = mean(series.slice(-7).map(s => s.qty));
   const onHandQty = inventory?.onHandQty || 0;
-  
+
+  // Determine if forecast is available
+  const salesCount = series.filter(s => s.qty > 0).length;
+  const forecastAvailable = salesCount >= 3 && forecastDailyDemand > 0.1;
+
   // Threshold: 30 days for most, 14 for perishables
   const category = (product.category || '').toLowerCase();
   const threshold = category.includes('dairy') || category.includes('fruit') || category.includes('vegetable') ? 14 : 30;
-  
-  const daysOfInventory = forecastDailyDemand > 0.1
+
+  // Days of inventory — NULL when forecast unavailable
+  const daysOfInventory: number | null = forecastAvailable
     ? onHandQty / forecastDailyDemand
-    : onHandQty > 0 ? 999 : 0;
-  
+    : null;
+
   // Movement class (ABC-XYZ simplified)
   const movementClass = computeMovementClass(series.map(s => s.qty), onHandQty);
-  
-  const isOverstock = daysOfInventory > threshold;
-  
+
+  // Classification per spec:
+  //   NO_DEMAND_SIGNAL  — demand unavailable
+  //   VERY_SLOW         — historical demand genuinely near zero
+  //   OVERSTOCK         — inventory exceeds expected coverage
+  //   HEALTHY           — within threshold
+  let classification: OverstockInfo['classification'] = 'HEALTHY';
+  let isOverstock = false;
   let recommendation = '';
-  if (isOverstock) {
+
+  if (!forecastAvailable) {
+    if (onHandQty > 0) {
+      classification = 'NO_DEMAND_SIGNAL';
+      recommendation = 'No sales history in last 28 days. Cannot assess overstock — review product status (discontinued? new arrival?).';
+    } else {
+      classification = 'HEALTHY';
+      recommendation = 'No stock and no demand signal.';
+    }
+  } else if (forecastDailyDemand < 0.5 && onHandQty > 0) {
+    classification = 'VERY_SLOW';
+    isOverstock = true;
+    recommendation = 'Very slow-moving item. Historical demand is near zero. Consider markdown or delisting.';
+  } else if (daysOfInventory !== null && daysOfInventory > threshold) {
+    classification = 'OVERSTOCK';
+    isOverstock = true;
     if (daysOfInventory > 90) {
       recommendation = 'Severe overstock. Consider markdown/discount to clear inventory.';
     } else if (daysOfInventory > 60) {
@@ -197,17 +242,20 @@ export async function computeOverstock(
       recommendation = 'Mild overstock. Skip next reorder cycle.';
     }
   } else {
+    classification = 'HEALTHY';
     recommendation = 'Stock level is within healthy range.';
   }
-  
+
   return {
     productId,
     sku: product.sku,
     productName: product.name,
     currentStock: onHandQty,
     forecastDailyDemand: round(forecastDailyDemand, 1),
-    daysOfInventory: round(daysOfInventory, 1),
+    forecastAvailable,
+    daysOfInventory: daysOfInventory !== null ? round(daysOfInventory, 1) : null,
     threshold,
+    classification,
     isOverstock,
     movementClass,
     recommendation,
@@ -442,13 +490,17 @@ export async function calculateReorder(
   const demandStd = std(series.slice(-14).map(s => s.qty));
   const forecastDemand7d = forecastDailyDemand * 7;
 
-  const leadTimeDemand = forecastDailyDemand * leadTimeDays;
-  const safetyStock = 1.65 * demandStd * Math.sqrt(leadTimeDays);
+  // Determine if forecast is available (at least 3 days of sales in last 28)
+  const salesCount = series.filter(s => s.qty > 0).length;
+  const forecastAvailable = salesCount >= 3 && forecastDailyDemand > 0.1;
+
+  const leadTimeDemand = forecastAvailable ? forecastDailyDemand * leadTimeDays : 0;
+  const safetyStock = forecastAvailable ? 1.65 * demandStd * Math.sqrt(leadTimeDays) : 0;
 
   // Festival buffer
   let festivalBuffer = 0;
   let festivalEffect: string | undefined;
-  if (festivalName) {
+  if (festivalName && forecastAvailable) {
     const impact = await analyzeFestivalImpact(productId, festivalName);
     if (impact.expectedUplift > 0) {
       festivalBuffer = Math.round(leadTimeDemand * impact.expectedUplift * impact.confidence);
@@ -469,17 +521,20 @@ export async function calculateReorder(
     - availableStock - onOrderStock;
 
   // Apply MOQ + pack size constraints
+  // Per spec: "If forecast is unavailable, DO NOT automatically use MOQ as recommendation.
+  // Instead: FORECAST_REQUIRED or a clearly labelled baseline fallback.
+  // Financial recommendations need evidence."
   let recommendedQty = 0;
   let limitingConstraint = 'NO_ORDER_NEEDED';
   const packSize = 1;
 
-  if (grossReorderNeed <= 0 && availableStock > 0) {
+  if (!forecastAvailable) {
+    // No forecast evidence — do NOT auto-recommend MOQ
+    recommendedQty = 0;
+    limitingConstraint = 'FORECAST_REQUIRED';
+  } else if (grossReorderNeed <= 0 && availableStock > 0) {
     recommendedQty = 0;
     limitingConstraint = 'NO_ORDER_NEEDED';
-  } else if (availableStock <= 0 && forecastDailyDemand < 0.1) {
-    // Out of stock with no sales history — recommend MOQ as minimum restock
-    recommendedQty = moq;
-    limitingConstraint = 'MOQ_ENFORCED_OOS';
   } else {
     recommendedQty = Math.max(Math.max(grossReorderNeed, 0), moq);
     recommendedQty = Math.ceil(recommendedQty / packSize) * packSize;
