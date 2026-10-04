@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { AppShell } from '@/components/app-shell';
 import { LandingPage } from '@/components/landing-page';
 import { DashboardPage } from '@/components/pages/dashboard';
@@ -37,61 +37,60 @@ export type PageKey =
 
 export default function HomePage() {
   const [page, setPage] = useState<PageKey>('dashboard');
-  const [bootstrapped, setBootstrapped] = useState(false);
+  // `entered` gates the landing page — always starts false on a fresh page load,
+  // so the user always sees the landing page first. Only flips to true when they
+  // click "Explore the platform".
+  const [entered, setEntered] = useState(false);
   const [bootstrapping, setBootstrapping] = useState(false);
   const { toast } = useToast();
 
-  const checkBootstrap = useCallback(async () => {
+  // Check if data is already loaded (so we can skip ingestion on "Explore")
+  const checkData = useCallback(async () => {
     try {
       const res = await fetch('/api/v1/health');
       const data = await res.json();
-      if (data.database && data.database.products > 0) {
-        return true;
-      }
-      return false;
+      return !!(data.database && data.database.products > 0);
     } catch {
       return false;
     }
   }, []);
 
-  useEffect(() => {
-    let mounted = true;
-    checkBootstrap().then((ok) => {
-      if (mounted && ok) setBootstrapped(true);
-    });
-    return () => { mounted = false; };
-  }, [checkBootstrap]);
-
-  const handleBootstrap = async () => {
+  const handleEnter = async () => {
     setBootstrapping(true);
-    try {
-      const res = await fetch('/api/v1/data/import', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ source: 'ALL' }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        toast({
-          title: 'Data ingestion complete',
-          description: 'Demo data loaded. Entering the dashboard…',
+    // Only ingest if data isn't already loaded
+    const alreadyLoaded = await checkData();
+    if (!alreadyLoaded) {
+      try {
+        const res = await fetch('/api/v1/data/import', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ source: 'ALL' }),
         });
-        setBootstrapped(true);
+        const data = await res.json();
+        if (data.success) {
+          toast({
+            title: 'Data ingestion complete',
+            description: 'Demo data loaded. Entering the dashboard…',
+          });
+        }
+      } catch (e: any) {
+        toast({
+          title: 'Ingestion failed',
+          description: e.message,
+          variant: 'destructive',
+        });
+        setBootstrapping(false);
+        return;
       }
-    } catch (e: any) {
-      toast({
-        title: 'Ingestion failed',
-        description: e.message,
-        variant: 'destructive',
-      });
-      setBootstrapping(false);
     }
+    setBootstrapping(false);
+    setEntered(true);
   };
 
-  // Show landing page until the user enters the dashboard
-  if (!bootstrapped) {
+  // Always show the landing page first — only enter the dashboard after explicit click
+  if (!entered) {
     return (
-      <LandingPage onEnterDashboard={handleBootstrap} bootstrapping={bootstrapping} />
+      <LandingPage onEnterDashboard={handleEnter} bootstrapping={bootstrapping} />
     );
   }
 
