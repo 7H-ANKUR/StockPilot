@@ -13,7 +13,7 @@ import {
   ResponsiveContainer, ComposedChart, Bar, Line, XAxis, YAxis,
   CartesianGrid, Tooltip, Legend, Area, AreaChart,
 } from 'recharts';
-import { TrendingUp, Brain, Sparkles } from 'lucide-react';
+import { TrendingUp, Brain, Sparkles, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface Product {
@@ -32,8 +32,17 @@ interface ForecastResult {
   lowerBound: number;
   upperBound: number;
   confidence: number;
+  selectedModel: string;
   modelVersion: string;
-  backtestMetrics?: { mae: number; rmse: number; wape: number; baselineMae: number };
+  backtestMetrics?: {
+    mae: number;
+    rmse: number;
+    wape: number;
+    baselineMae: number;
+    evaluationValid: boolean;
+    evaluationNote?: string;
+  };
+  allModelMetrics?: Record<string, { mae: number; rmse: number; beatsBaseline: boolean; evaluationValid: boolean }>;
 }
 
 export function ForecastingPage() {
@@ -171,47 +180,128 @@ export function ForecastingPage() {
           {/* Backtest metrics */}
           <Card className="lg:col-span-2">
             <CardHeader>
-              <CardTitle className="text-base">Backtest Metrics (Time-Aware Validation)</CardTitle>
+              <CardTitle className="text-base flex items-center gap-2">
+                Backtest Metrics (Time-Aware Validation)
+                {forecast.selectedModel && (
+                  <Badge className="bg-primary text-primary-foreground">
+                    Selected: {forecast.selectedModel}
+                  </Badge>
+                )}
+              </CardTitle>
               <CardDescription>
-                Compared against naive baseline (7-day rolling average × horizon).
-                Model is only promoted if it beats baseline.
+                All 5 variants trained + backtested. Best model that beats naive baseline is selected.
+                Per spec: "No model should be promoted unless it beats the baseline."
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {forecast.backtestMetrics ? (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <Metric
-                    label="MAE"
-                    value={fmt(forecast.backtestMetrics.mae)}
-                    subtitle="Mean Abs Error"
-                  />
-                  <Metric
-                    label="RMSE"
-                    value={fmt(forecast.backtestMetrics.rmse)}
-                    subtitle="Root Mean Sq Error"
-                  />
-                  <Metric
-                    label="WAPE"
-                    value={`${(forecast.backtestMetrics.wape * 100).toFixed(1)}%`}
-                    subtitle="Weighted Abs % Error"
-                  />
-                  <Metric
-                    label="Baseline MAE"
-                    value={fmt(forecast.backtestMetrics.baselineMae)}
-                    subtitle="Naive 7-day avg"
-                    highlight={forecast.backtestMetrics.mae < forecast.backtestMetrics.baselineMae}
-                  />
+              {forecast.backtestMetrics && forecast.backtestMetrics.evaluationValid ? (
+                <>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                    <Metric
+                      label="MAE"
+                      value={fmt(forecast.backtestMetrics.mae)}
+                      subtitle="Mean Abs Error"
+                    />
+                    <Metric
+                      label="RMSE"
+                      value={fmt(forecast.backtestMetrics.rmse)}
+                      subtitle="Root Mean Sq Error"
+                    />
+                    <Metric
+                      label="WAPE"
+                      value={`${(forecast.backtestMetrics.wape * 100).toFixed(1)}%`}
+                      subtitle="Weighted Abs % Error"
+                    />
+                    <Metric
+                      label="Baseline MAE"
+                      value={fmt(forecast.backtestMetrics.baselineMae)}
+                      subtitle="Naive 7-day avg"
+                      highlight={forecast.backtestMetrics.mae < forecast.backtestMetrics.baselineMae}
+                    />
+                  </div>
+                  {forecast.backtestMetrics.evaluationNote && (
+                    <div className="text-xs text-muted-foreground italic mb-4 p-2 rounded bg-muted/30">
+                      {forecast.backtestMetrics.evaluationNote}
+                    </div>
+                  )}
+                </>
+              ) : forecast.backtestMetrics && !forecast.backtestMetrics.evaluationValid ? (
+                <div className="p-4 rounded-md bg-warning/10 border border-warning/30 mb-4">
+                  <div className="flex items-center gap-2 text-warning font-medium text-sm">
+                    <AlertCircle className="w-4 h-4" />
+                    Evaluation Invalid
+                  </div>
+                  <div className="text-xs text-muted-foreground mt-2">
+                    {forecast.backtestMetrics.evaluationNote || 'All metrics are 0/0/0 — this is a failure to establish a valid evaluation, NOT an excellent result. Insufficient training data or constant target.'}
+                  </div>
                 </div>
               ) : (
                 <div className="text-sm text-muted-foreground py-8 text-center">
                   Not enough historical data to compute backtest metrics.
                 </div>
               )}
+
+              {/* All model variants comparison */}
+              {forecast.allModelMetrics && Object.keys(forecast.allModelMetrics).length > 0 && (
+                <div className="mt-4">
+                  <div className="text-xs text-muted-foreground uppercase tracking-wider mb-2">
+                    Model Progression: Naive → Ridge → RF → GB → LightGBM
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-xs">
+                      <thead>
+                        <tr className="border-b">
+                          <th className="text-left py-2 px-2">Variant</th>
+                          <th className="text-right py-2 px-2">MAE</th>
+                          <th className="text-right py-2 px-2">RMSE</th>
+                          <th className="text-center py-2 px-2">Beats Baseline</th>
+                          <th className="text-center py-2 px-2">Selected</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {['naive', 'ridge', 'rf', 'gb', 'lightgbm'].map((variant) => {
+                          const m = forecast.allModelMetrics![variant];
+                          if (!m) return null;
+                          const isSelected = forecast.selectedModel === variant;
+                          return (
+                            <tr key={variant} className={`border-b ${isSelected ? 'bg-primary/5' : ''}`}>
+                              <td className="py-2 px-2 font-mono">{variant}</td>
+                              <td className="text-right py-2 px-2 tabular-nums">
+                                {m.evaluationValid ? m.mae.toFixed(3) : '—'}
+                              </td>
+                              <td className="text-right py-2 px-2 tabular-nums">
+                                {m.evaluationValid ? m.rmse.toFixed(3) : '—'}
+                              </td>
+                              <td className="text-center py-2 px-2">
+                                {variant === 'naive' ? (
+                                  <span className="text-muted-foreground text-xs">baseline</span>
+                                ) : m.evaluationValid ? (
+                                  m.beatsBaseline ? (
+                                    <span className="text-success">✓</span>
+                                  ) : (
+                                    <span className="text-destructive">✗</span>
+                                  )
+                                ) : (
+                                  <span className="text-muted-foreground text-xs">N/A</span>
+                                )}
+                              </td>
+                              <td className="text-center py-2 px-2">
+                                {isSelected && <span className="text-primary">●</span>}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
               <div className="mt-4 p-3 rounded-md bg-muted/50 text-xs">
                 <strong>Why this matters:</strong> The model uses time-aware validation
                 (no look-ahead leakage). Features include lag-1/3/7/14/28, rolling
                 mean-7/14/28, rolling std, weekday, month, week-of-year, weekend flag,
-                recent velocity, and 7-vs-28 day trend.
+                recent velocity, and 7-vs-28 day trend. <strong>0/0/0 metrics = evaluation failure, not excellence.</strong>
               </div>
             </CardContent>
           </Card>

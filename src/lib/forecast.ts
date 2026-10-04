@@ -1,6 +1,9 @@
 /**
- * Feature Engineering + Demand Forecasting Engine
- * 
+ * Feature Engineering + Demand Forecasting Engine — Layer 1
+ *
+ * ARCHITECTURE (per spec correction):
+ *   Layer 1 of 4 intelligence layers. The LLM sits ABOVE this layer (not in it).
+ *
  * Per docs:
  *  - Features: lags (1,3,7,14,28), rolling mean (7,14,28), rolling std,
  *    weekday, month, week-of-year, promotion, price, store, category, festival, stockout state
@@ -8,19 +11,19 @@
  *  - Time-aware validation
  *  - Compare against naive baseline (recent 7-day avg)
  *  - Metrics: MAE, RMSE, WAPE
- * 
- * Models:
- *  1. Naive baseline (7-day rolling avg)
- *  2. Linear regression (closed-form via gradient descent)
- *  3. Gradient-boosted trees (simplified)
- * 
- * We use a simplified regression model (multiple linear regression via
- * normal equations + ridge regularization) since we don't have a heavy
- * ML library installed. This still beats the naive baseline on
- * structured retail features.
+ *
+ * Model Progression (per spec):
+ *   Naive → Ridge → RF → GB → LightGBM
+ *
+ *   All 5 variants are trained + backtested. The model with the lowest MAE
+ *   that BEATS the naive baseline is selected for inference. If no model
+ *   beats the baseline, the naive baseline is used (per docs: "No model
+ *   should be promoted unless it beats the baseline on the agreed
+ *   validation windows").
  */
 
 import { db } from '@/lib/db';
+import { NaiveBaseline, RidgeRegression, RandomForest, GradientBoosting, LightGBMStyle } from '@/lib/models/algorithms';
 
 export interface ForecastResult {
   productId: string;
@@ -32,8 +35,17 @@ export interface ForecastResult {
   upperBound: number;
   confidence: number;
   features: Record<string, number>;
+  selectedModel: string; // which variant was selected
   modelVersion: string;
-  backtestMetrics?: { mae: number; rmse: number; wape: number; baselineMae: number };
+  backtestMetrics?: {
+    mae: number;
+    rmse: number;
+    wape: number;
+    baselineMae: number;
+    evaluationValid: boolean;
+    evaluationNote?: string;
+  };
+  allModelMetrics?: Record<string, { mae: number; rmse: number; beatsBaseline: boolean; evaluationValid: boolean }>;
 }
 
 // ============================================================
@@ -45,18 +57,42 @@ export async function getDailySalesSeries(
   storeId?: string,
   days = 90
 ): Promise<{ date: Date; qty: number; netSales: number }[]> {
-  const cutoff = new Date();
-  cutoff.setDate(cutoff.getDate() - days);
-  
+  // Find the most recent sale for this product to anchor the time window.
+  // The retail datasets are historical (2014-2018), so anchoring on "now"
+  // would return an empty series. We anchor on the latest actual sale.
+  const latestSale = await db.sale.findFirst({
+    where: {
+      productId,
+      ...(storeId ? { storeId } : {}),
+    },
+    orderBy: { saleTimestamp: 'desc' },
+  });
+
+  if (!latestSale) {
+    // No sales at all — return empty series of `days` length ending today
+    const result: { date: Date; qty: number; netSales: number }[] = [];
+    for (let i = days - 1; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      result.push({ date: d, qty: 0, netSales: 0 });
+    }
+    return result;
+  }
+
+  // Anchor: latest sale date. Look back `days` days from there.
+  const anchorEnd = new Date(latestSale.saleTimestamp);
+  const anchorStart = new Date(anchorEnd);
+  anchorStart.setDate(anchorStart.getDate() - days);
+
   const sales = await db.sale.findMany({
     where: {
       productId,
       ...(storeId ? { storeId } : {}),
-      saleTimestamp: { gte: cutoff },
+      saleTimestamp: { gte: anchorStart, lte: anchorEnd },
     },
     orderBy: { saleTimestamp: 'asc' },
   });
-  
+
   // Aggregate by day
   const byDay = new Map<string, { qty: number; netSales: number }>();
   for (const s of sales) {
@@ -66,16 +102,16 @@ export async function getDailySalesSeries(
     cur.netSales += s.netSales;
     byDay.set(dayKey, cur);
   }
-  
+
   const result: { date: Date; qty: number; netSales: number }[] = [];
   for (let i = days - 1; i >= 0; i--) {
-    const d = new Date();
+    const d = new Date(anchorEnd);
     d.setDate(d.getDate() - i);
     const key = d.toISOString().slice(0, 10);
     const data = byDay.get(key) || { qty: 0, netSales: 0 };
     result.push({ date: d, qty: data.qty, netSales: data.netSales });
   }
-  
+
   return result;
 }
 
@@ -151,81 +187,13 @@ export function buildFeatures(
   return { features, featureNames };
 }
 
-// ============================================================
-// LINEAR REGRESSION (Ridge)
-// ============================================================
-
-export class RidgeRegression {
-  weights: number[] = [];
-  bias = 0;
-  featureNames: string[] = [];
-  private nFeatures = 0;
-  
-  fit(X: number[][], y: number[], lambda = 1.0, epochs = 200, lr = 0.001) {
-    if (X.length === 0) return;
-    this.nFeatures = X[0].length;
-    this.weights = new Array(this.nFeatures).fill(0);
-    this.bias = 0;
-    
-    // Standardize features
-    const means = new Array(this.nFeatures).fill(0);
-    const stds = new Array(this.nFeatures).fill(1);
-    for (let j = 0; j < this.nFeatures; j++) {
-      const col = X.map(r => r[j]);
-      means[j] = mean(col);
-      stds[j] = std(col) || 1;
-    }
-    
-    const Xn = X.map(r => r.map((v, j) => (v - means[j]) / stds[j]));
-    const yn = y.map(v => v);
-    const yMean = mean(yn);
-    const yc = yn.map(v => v - yMean);
-    
-    // Gradient descent with L2 regularization
-    for (let epoch = 0; epoch < epochs; epoch++) {
-      const grads = new Array(this.nFeatures).fill(0);
-      let gradBias = 0;
-      
-      for (let i = 0; i < Xn.length; i++) {
-        let pred = this.bias;
-        for (let j = 0; j < this.nFeatures; j++) {
-          pred += this.weights[j] * Xn[i][j];
-        }
-        const err = pred - yc[i];
-        gradBias += err;
-        for (let j = 0; j < this.nFeatures; j++) {
-          grads[j] += err * Xn[i][j];
-        }
-      }
-      
-      const m = Xn.length;
-      this.bias -= lr * gradBias / m;
-      for (let j = 0; j < this.nFeatures; j++) {
-        this.weights[j] -= lr * (grads[j] / m + lambda * this.weights[j] / m);
-      }
-    }
-    
-    // Store standardization params
-    (this as any)._means = means;
-    (this as any)._stds = stds;
-    (this as any)._yMean = yMean;
-  }
-  
-  predict(x: number[]): number {
-    const means = (this as any)._means as number[];
-    const stds = (this as any)._stds as number[];
-    const yMean = (this as any)._yMean as number;
-    
-    let pred = this.bias + yMean;
-    for (let j = 0; j < x.length; j++) {
-      pred += this.weights[j] * ((x[j] - means[j]) / stds[j]);
-    }
-    return Math.max(0, pred); // Demand can't be negative
-  }
-}
+// RidgeRegression is now imported from '@/lib/models/algorithms'
+// All 5 model variants (Naive, Ridge, RF, GB, LightGBM) live there.
 
 // ============================================================
-// FORECAST PIPELINE
+// FORECAST PIPELINE — Multi-model with selection
+// Trains all 5 variants, backtests each, picks the best one
+// that beats the naive baseline.
 // ============================================================
 
 export async function forecastDemand(
@@ -235,103 +203,199 @@ export async function forecastDemand(
 ): Promise<ForecastResult> {
   const series = await getDailySalesSeries(productId, storeId || undefined, 90);
   const product = await db.product.findUnique({ where: { id: productId } });
-  
+
   if (!product) {
     throw new Error('Product not found');
   }
-  
+
   // Build training data: sliding windows of (features -> next 7-day sum)
   const trainX: number[][] = [];
   const trainY: number[] = [];
-  
+
   for (let i = 28; i < series.length - horizonDays; i++) {
     const subSeries = series.slice(0, i + 1);
     const { features } = buildFeatures(subSeries, 1);
-    
-    // Target: sum of next `horizonDays` days
+
     let target = 0;
     for (let h = 1; h <= horizonDays; h++) {
       if (i + h < series.length) target += series[i + h].qty;
     }
-    
+
     trainX.push(features);
     trainY.push(target);
   }
-  
-  // Train model
-  const model = new RidgeRegression();
+
+  // Train ALL 5 model variants
+  const models: Record<string, any> = {
+    naive: new NaiveBaseline(),
+    ridge: new RidgeRegression(),
+    rf: new RandomForest(),
+    gb: new GradientBoosting(),
+    lightgbm: new LightGBMStyle(),
+  };
+
   if (trainX.length > 5) {
-    model.fit(trainX, trainY, 1.0, 300, 0.01);
+    models.naive.fit(trainX, trainY);
+    models.ridge.fit(trainX, trainY, 1.0, 300, 0.01);
+    models.rf.fit(trainX, trainY);
+    models.gb.fit(trainX, trainY);
+    models.lightgbm.fit(trainX, trainY);
   }
-  
-  // Predict
+
+  // Backtest all variants
+  const allMetrics: Record<string, { mae: number; rmse: number; beatsBaseline: boolean; evaluationValid: boolean }> = {};
+  let backtest: ForecastResult['backtestMetrics'];
+
+  if (trainX.length < 14) {
+    // Insufficient data — backtest invalid
+    backtest = {
+      mae: 0,
+      rmse: 0,
+      wape: 0,
+      baselineMae: 0,
+      evaluationValid: false,
+      evaluationNote: 'Insufficient training data for backtest evaluation',
+    };
+    for (const variant of Object.keys(models)) {
+      allMetrics[variant] = { mae: 0, rmse: 0, beatsBaseline: false, evaluationValid: false };
+    }
+  } else {
+    const testSize = Math.min(7, Math.floor(trainX.length * 0.2));
+    const trainSize = trainX.length - testSize;
+
+    // Retrain on training slice
+    const trainSliceModels: Record<string, any> = {
+      naive: new NaiveBaseline(),
+      ridge: new RidgeRegression(),
+      rf: new RandomForest(),
+      gb: new GradientBoosting(),
+      lightgbm: new LightGBMStyle(),
+    };
+    trainSliceModels.naive.fit(trainX.slice(0, trainSize), trainY.slice(0, trainSize));
+    trainSliceModels.ridge.fit(trainX.slice(0, trainSize), trainY.slice(0, trainSize), 1.0, 300, 0.01);
+    trainSliceModels.rf.fit(trainX.slice(0, trainSize), trainY.slice(0, trainSize));
+    trainSliceModels.gb.fit(trainX.slice(0, trainSize), trainY.slice(0, trainSize));
+    trainSliceModels.lightgbm.fit(trainX.slice(0, trainSize), trainY.slice(0, trainSize));
+
+    // Evaluate each model
+    for (const [variant, model] of Object.entries(trainSliceModels)) {
+      let absErrSum = 0;
+      let sqErrSum = 0;
+      for (let i = trainSize; i < trainX.length; i++) {
+        const pred = model.predict(trainX[i]);
+        const actual = trainY[i];
+        absErrSum += Math.abs(pred - actual);
+        sqErrSum += (pred - actual) ** 2;
+      }
+      allMetrics[variant] = {
+        mae: absErrSum / testSize,
+        rmse: Math.sqrt(sqErrSum / testSize),
+        beatsBaseline: false, // set below after baseline computed
+        evaluationValid: true,
+      };
+    }
+
+    // Baseline MAE (naive 7-day avg)
+    const baselineMae = allMetrics.naive.mae;
+    let absActualSum = 0;
+    for (let i = trainSize; i < trainX.length; i++) {
+      absActualSum += Math.abs(trainY[i]);
+    }
+
+    // Mark beatsBaseline
+    for (const variant of Object.keys(allMetrics)) {
+      if (variant === 'naive') {
+        allMetrics[variant].beatsBaseline = false; // baseline doesn't beat itself
+      } else {
+        allMetrics[variant].beatsBaseline = allMetrics[variant].mae < baselineMae;
+      }
+    }
+
+    // Select best model: lowest MAE that beats baseline
+    let selectedVariant = 'naive';
+    let bestMae = baselineMae;
+    for (const [variant, m] of Object.entries(allMetrics)) {
+      if (variant !== 'naive' && m.beatsBaseline && m.mae < bestMae) {
+        bestMae = m.mae;
+        selectedVariant = variant;
+      }
+    }
+
+    // Edge case: if all metrics are 0, evaluation is invalid
+    const allZero = Object.values(allMetrics).every(m => m.mae === 0 && m.rmse === 0);
+    if (allZero) {
+      backtest = {
+        mae: 0,
+        rmse: 0,
+        wape: 0,
+        baselineMae: 0,
+        evaluationValid: false,
+        evaluationNote: 'Evaluation failed: all metrics are 0 (insufficient data or constant target)',
+      };
+    } else {
+      backtest = {
+        mae: round(allMetrics[selectedVariant].mae, 3),
+        rmse: round(allMetrics[selectedVariant].rmse, 3),
+        wape: absActualSum > 0 ? round(allMetrics[selectedVariant].mae / (absActualSum / (trainX.length - trainSize)), 3) : 0,
+        baselineMae: round(baselineMae, 3),
+        evaluationValid: true,
+        evaluationNote: selectedVariant === 'naive'
+          ? 'No candidate beat the naive baseline — using baseline (per spec policy)'
+          : `${selectedVariant} selected (beats baseline by ${(((baselineMae - allMetrics[selectedVariant].mae) / Math.max(baselineMae, 0.001)) * 100).toFixed(1)}%)`,
+      };
+    }
+  }
+
+  // Select the model for inference (same logic as backtest)
+  let selectedVariant = 'naive';
+  if (backtest?.evaluationValid) {
+    let bestMae = backtest.baselineMae;
+    for (const [variant, m] of Object.entries(allMetrics)) {
+      if (variant !== 'naive' && m.beatsBaseline && m.mae < bestMae) {
+        bestMae = m.mae;
+        selectedVariant = variant;
+      }
+    }
+  }
+
+  // Predict using selected model
   const { features: latestFeatures, featureNames } = buildFeatures(series, 1);
   let predictedQty: number;
-  
+
   if (trainX.length > 5) {
-    predictedQty = model.predict(latestFeatures);
+    predictedQty = models[selectedVariant].predict(latestFeatures);
   } else {
-    // Fallback: naive baseline (7-day mean × horizon)
     const recent7 = series.slice(-7).map(s => s.qty);
     const mean7 = mean(recent7);
     predictedQty = mean7 * horizonDays;
   }
-  
-  // Naive baseline for backtest
-  const baselinePred = mean(series.slice(-7).map(s => s.qty)) * horizonDays;
-  
-  // Confidence interval (rough estimate based on rolling std)
+
+  // Confidence interval
   const rollingStd = std(series.slice(-14).map(s => s.qty));
   const lowerBound = Math.max(0, predictedQty - 1.96 * rollingStd * Math.sqrt(horizonDays));
   const upperBound = predictedQty + 1.96 * rollingStd * Math.sqrt(horizonDays);
-  
-  // Confidence: based on data volume + variance
+
+  // Confidence: based on data volume + variance + selected model performance
   const dataPoints = series.filter(s => s.qty > 0).length;
   const cv = rollingStd / Math.max(mean(series.slice(-14).map(s => s.qty)), 1);
-  const confidence = Math.min(0.95, Math.max(0.3, 0.5 + 0.3 * (dataPoints / 60) - 0.3 * cv));
-  
-  // Backtest metrics (last 7 windows)
-  const backtest: { mae: number; rmse: number; wape: number; baselineMae: number } | undefined = (() => {
-    if (trainX.length < 14) return undefined;
-    
-    const testSize = Math.min(7, Math.floor(trainX.length * 0.2));
-    const trainSize = trainX.length - testSize;
-    
-    const m = new RidgeRegression();
-    m.fit(trainX.slice(0, trainSize), trainY.slice(0, trainSize), 1.0, 300, 0.01);
-    
-    let absErrSum = 0;
-    let sqErrSum = 0;
-    let absBaselineErrSum = 0;
-    let absActualSum = 0;
-    
-    for (let i = trainSize; i < trainX.length; i++) {
-      const pred = m.predict(trainX[i]);
-      const actual = trainY[i];
-      const baseline = mean(series.slice(Math.max(0, series.length - (trainX.length - i) * horizonDays - 7), Math.max(0, series.length - (trainX.length - i) * horizonDays)).map(s => s.qty)) * horizonDays;
-      
-      absErrSum += Math.abs(pred - actual);
-      sqErrSum += Math.pow(pred - actual, 2);
-      absBaselineErrSum += Math.abs(baseline - actual);
-      absActualSum += Math.abs(actual);
-    }
-    
-    const testN = testSize;
-    return {
-      mae: absErrSum / testN,
-      rmse: Math.sqrt(sqErrSum / testN),
-      wape: absActualSum > 0 ? absErrSum / absActualSum : 0,
-      baselineMae: absBaselineErrSum / testN,
-    };
-  })();
-  
-  // Get or create model version
+  const baseConfidence = Math.min(0.95, Math.max(0.3, 0.5 + 0.3 * (dataPoints / 60) - 0.3 * cv));
+  // Reduce confidence if evaluation invalid or selected model doesn't beat baseline
+  const evalConfidence = backtest?.evaluationValid
+    ? (selectedVariant === 'naive' ? 0.6 : 0.85)
+    : 0.4;
+  const confidence = Math.min(baseConfidence, evalConfidence);
+
+  // Get or create model version for the SELECTED variant
+  const modelVersionId = `mdl-demand-${selectedVariant}`;
   const modelVersion = await db.modelVersion.upsert({
-    where: { id: 'mv-demand-v1' },
-    update: {},
+    where: { id: modelVersionId },
+    update: {
+      metricsJson: JSON.stringify(backtest || {}),
+      status: 'ACTIVE',
+    },
     create: {
-      id: 'mv-demand-v1',
-      modelName: 'RidgeRegressionDemandForecast',
+      id: modelVersionId,
+      modelName: models[selectedVariant].constructor.name,
       version: '1.0.0',
       featureVersion: '1.0',
       trainingDataset: 'SUPERMART + INDIAN_SUPERSTORE',
@@ -339,7 +403,7 @@ export async function forecastDemand(
       status: 'ACTIVE',
     },
   });
-  
+
   // Persist forecast
   const forecastDate = new Date();
   await db.forecast.create({
@@ -355,13 +419,13 @@ export async function forecastDemand(
       confidence: Math.round(confidence * 100) / 100,
       modelVersionId: modelVersion.id,
     },
-  }).catch(() => {}); // ignore unique constraint
-  
+  }).catch(() => {});
+
   const featureMap: Record<string, number> = {};
   featureNames.forEach((name, i) => {
     featureMap[name] = latestFeatures[i] || 0;
   });
-  
+
   return {
     productId,
     sku: product.sku,
@@ -372,8 +436,17 @@ export async function forecastDemand(
     upperBound: Math.round(upperBound * 10) / 10,
     confidence: Math.round(confidence * 100) / 100,
     features: featureMap,
+    selectedModel: selectedVariant,
     modelVersion: `${modelVersion.modelName}@${modelVersion.version}`,
     backtestMetrics: backtest,
+    allModelMetrics: Object.fromEntries(
+      Object.entries(allMetrics).map(([k, v]) => [k, {
+        mae: round(v.mae, 3),
+        rmse: round(v.rmse, 3),
+        beatsBaseline: v.beatsBaseline,
+        evaluationValid: v.evaluationValid,
+      }])
+    ),
   };
 }
 
@@ -391,6 +464,11 @@ function std(arr: number[]): number {
   const m = mean(arr);
   const variance = arr.reduce((s, v) => s + (v - m) ** 2, 0) / (arr.length - 1);
   return Math.sqrt(variance);
+}
+
+function round(n: number, decimals: number = 2): number {
+  const f = Math.pow(10, decimals);
+  return Math.round(n * f) / f;
 }
 
 function getWeekOfYear(d: Date): number {
