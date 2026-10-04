@@ -94,7 +94,7 @@ export async function GET() {
   const next90 = new Date();
   next90.setDate(next90.getDate() + 90);
   const upcomingFestivals = await db.festival.findMany({
-    where: { startDate: { gte: today, lte: next90 } },
+    where: { endDate: { gte: today }, startDate: { lte: next90 } },
     orderBy: { startDate: 'asc' },
     take: 5,
   });

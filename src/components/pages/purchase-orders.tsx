@@ -15,8 +15,9 @@ import {
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from '@/components/ui/dialog';
-import { ShoppingCart, FileText, IndianRupee, Truck } from 'lucide-react';
+import { ShoppingCart, FileText, IndianRupee, Truck, Printer } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { ExportButton } from '@/components/export-button';
 
 export function PurchaseOrdersPage() {
   const [pos, setPos] = useState<any[]>([]);
@@ -128,14 +129,17 @@ export function PurchaseOrdersPage() {
 
       {/* PO list */}
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <FileText className="w-4 h-4 text-primary" />
-            Purchase Orders
-          </CardTitle>
-          <CardDescription>
-            All POs with line items, totals, and tax breakdown. POs are transactional and idempotent.
-          </CardDescription>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+          <div>
+            <CardTitle className="flex items-center gap-2">
+              <FileText className="w-4 h-4 text-primary" />
+              Purchase Orders
+            </CardTitle>
+            <CardDescription className="mt-1">
+              All POs with line items, totals, and tax breakdown. POs are transactional and idempotent.
+            </CardDescription>
+          </div>
+          <ExportButton type="purchase-orders" label="Export POs (.xlsx)" />
         </CardHeader>
         <CardContent>
           {loading ? (
@@ -271,6 +275,16 @@ export function PurchaseOrdersPage() {
                   <span className="tabular-nums">{fmtINR(viewPo.estimatedTotal)}</span>
                 </div>
               </div>
+
+              <DialogFooter className="flex items-center justify-between sm:justify-between border-t pt-4">
+                <Button variant="outline" size="sm" onClick={() => window.print()} className="gap-1.5">
+                  <Printer className="w-3.5 h-3.5" />
+                  Print / Save PO (PDF)
+                </Button>
+                <Button size="sm" onClick={() => setViewPo(null)}>
+                  Close
+                </Button>
+              </DialogFooter>
             </div>
           )}
         </DialogContent>

@@ -19,11 +19,38 @@ export async function GET(req: NextRequest) {
     where.category = category;
   }
   
-  const products = await db.product.findMany({
-    where,
-    take: limit,
-    orderBy: { createdAt: 'desc' },
-  });
+  const withSalesFirst = url.searchParams.get('withSalesFirst') === 'true';
+
+  let products: any[] = [];
+  if (withSalesFirst) {
+    const productsWithSales = await db.product.findMany({
+      where: { ...where, sales: { some: {} } },
+      take: limit,
+      orderBy: { name: 'asc' },
+    });
+    const withSalesIds = new Set(productsWithSales.map(p => p.id));
+    const remainingLimit = Math.max(0, limit - productsWithSales.length);
+
+    let otherProducts: any[] = [];
+    if (remainingLimit > 0) {
+      otherProducts = await db.product.findMany({
+        where: { ...where, id: { notIn: Array.from(withSalesIds) } },
+        take: remainingLimit,
+        orderBy: { name: 'asc' },
+      });
+    }
+
+    products = [
+      ...productsWithSales.map(p => ({ ...p, hasSales: true })),
+      ...otherProducts.map(p => ({ ...p, hasSales: false })),
+    ];
+  } else {
+    products = await db.product.findMany({
+      where,
+      take: limit,
+      orderBy: { createdAt: 'desc' },
+    });
+  }
   
   const categories = await db.product.findMany({
     select: { category: true },

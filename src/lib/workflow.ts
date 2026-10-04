@@ -19,46 +19,42 @@ export async function generateRecommendations(
   festivalName?: string,
   limit: number = 20
 ): Promise<{ count: number; recommendations: any[] }> {
-  // Find all inventory items
-  const inventory = await db.inventorySnapshot.findMany({
-    where: { storeId: DEFAULT_STORE_ID },
-    orderBy: { snapshotDate: 'desc' },
-    take: 500,
+  // 1. Prioritize active products with POS transaction history (highest demand fidelity)
+  const salesGroup = await db.sale.groupBy({
+    by: ['productId'],
+    _count: { id: true },
+    orderBy: { _count: { id: 'desc' } },
+  });
+  const activeProductIds = salesGroup.map(s => s.productId);
+
+  // 2. Fetch inventory snapshots for active products and low-stock items
+  const prioritySnapshots = await db.inventorySnapshot.findMany({
+    where: {
+      storeId: DEFAULT_STORE_ID,
+      OR: [
+        { productId: { in: activeProductIds } },
+        { onHandQty: { lte: 15 } }
+      ]
+    },
+    orderBy: { onHandQty: 'asc' },
     include: { product: true },
+    take: 200,
   });
   
   // Dedupe by product (latest snapshot)
   const seen = new Set<string>();
-  const unique = inventory.filter(i => {
+  const unique = prioritySnapshots.filter(i => {
     if (seen.has(i.productId)) return false;
     seen.add(i.productId);
     return true;
   });
   
-  const candidates: any[] = [];
-  for (const inv of unique.slice(0, 1000)) {
-    const risk = await computeStockoutRisk(inv.productId, DEFAULT_STORE_ID);
-    if (risk.riskLevel === 'HIGH' || risk.riskLevel === 'CRITICAL' || risk.riskLevel === 'WATCH') {
-      candidates.push({ inventory: inv, risk });
-    }
-  }
-  
-  // Sort by stockout probability descending
-  candidates.sort((a, b) => b.risk.stockoutProbability - a.risk.stockoutProbability);
-  
-  const top = candidates.slice(0, limit);
   const recommendations: any[] = [];
   
-  for (const { inventory: inv, risk } of top) {
-    // Compute reorder
-    const reorder = await calculateReorder(inv.productId, DEFAULT_STORE_ID, festivalName);
-    
-    // Per spec: "If forecast is unavailable, DO NOT automatically use MOQ as recommendation."
-    // Skip items with FORECAST_REQUIRED — they need forecast evidence before recommendation.
-    if (reorder.limitingConstraint === 'FORECAST_REQUIRED') continue;
-    if (reorder.recommendedQty <= 0) continue;
-    
-    // Check if pending recommendation already exists for this product
+  for (const inv of unique) {
+    if (recommendations.length >= limit) break;
+
+    // Check if pending or approved recommendation already exists for this product
     const existing = await db.recommendation.findFirst({
       where: {
         productId: inv.productId,
@@ -66,49 +62,71 @@ export async function generateRecommendations(
       },
     });
     if (existing) continue;
-    
-    // Create recommendation
-    const rec = await db.recommendation.create({
-      data: {
-        tenantId: DEFAULT_TENANT_ID,
-        storeId: DEFAULT_STORE_ID,
-        productId: inv.productId,
-        supplierId: reorder.supplierId || null,
-        recommendedQty: reorder.recommendedQty,
-        estimatedCost: reorder.estimatedCost,
-        riskLevel: reorder.riskLevel,
-        confidence: reorder.confidence,
-        reasoningSummary: reorder.reasoningSummary,
-        festivalEffect: reorder.festivalEffect || null,
-        status: 'PENDING_REVIEW',
-        modelVersionId: 'mv-demand-v1',
-        currentStock: reorder.currentStock,
-        forecastQty: reorder.forecastDemand7d,
-        leadTimeDays: reorder.leadTimeDays,
-        moq: reorder.moq,
-        safetyStock: reorder.safetyStock,
-      },
-      include: { product: true, supplier: true },
-    });
-    
-    recommendations.push(rec);
-    
-    // Audit log
-    await db.auditEvent.create({
-      data: {
-        tenantId: DEFAULT_TENANT_ID,
-        action: 'RECOMMENDATION_CREATED',
-        resourceType: 'RECOMMENDATION',
-        resourceId: rec.id,
-        newValue: JSON.stringify({
+
+    // Compute stockout risk
+    const risk = await computeStockoutRisk(inv.productId, DEFAULT_STORE_ID);
+    if (risk.riskLevel === 'HIGH' || risk.riskLevel === 'CRITICAL' || risk.riskLevel === 'WATCH') {
+      // Compute reorder recommendation
+      const reorder = await calculateReorder(inv.productId, DEFAULT_STORE_ID, festivalName);
+      
+      // Skip items without forecast evidence or with zero recommended qty
+      if (reorder.limitingConstraint === 'FORECAST_REQUIRED') continue;
+      if (reorder.recommendedQty <= 0) continue;
+      
+      // Create recommendation
+      const rec = await db.recommendation.create({
+        data: {
+          tenantId: DEFAULT_TENANT_ID,
+          storeId: DEFAULT_STORE_ID,
           productId: inv.productId,
+          supplierId: reorder.supplierId || null,
           recommendedQty: reorder.recommendedQty,
+          estimatedCost: reorder.estimatedCost,
           riskLevel: reorder.riskLevel,
-        }),
-        source: 'RECOMMENDATION_ENGINE',
-        timestamp: new Date(),
-      },
+          confidence: reorder.confidence,
+          reasoningSummary: reorder.reasoningSummary,
+          festivalEffect: reorder.festivalEffect || null,
+          status: 'PENDING_REVIEW',
+          modelVersionId: 'mv-demand-v1',
+          currentStock: reorder.currentStock,
+          forecastQty: reorder.forecastDemand7d,
+          leadTimeDays: reorder.leadTimeDays,
+          moq: reorder.moq,
+          safetyStock: reorder.safetyStock,
+        },
+        include: { product: true, supplier: true },
+      });
+      
+      recommendations.push(rec);
+      
+      // Audit log
+      await db.auditEvent.create({
+        data: {
+          tenantId: DEFAULT_TENANT_ID,
+          action: 'RECOMMENDATION_CREATED',
+          resourceType: 'RECOMMENDATION',
+          resourceId: rec.id,
+          newValue: JSON.stringify({
+            productId: inv.productId,
+            recommendedQty: reorder.recommendedQty,
+            riskLevel: reorder.riskLevel,
+          }),
+          source: 'RECOMMENDATION_ENGINE',
+          timestamp: new Date(),
+        },
+      });
+    }
+  }
+
+  // If no new recommendations were created, return any existing pending recommendations
+  if (recommendations.length === 0) {
+    const existingPending = await db.recommendation.findMany({
+      where: { storeId: DEFAULT_STORE_ID, status: 'PENDING_REVIEW' },
+      include: { product: true, supplier: true },
+      take: limit,
+      orderBy: { createdAt: 'desc' },
     });
+    return { count: existingPending.length, recommendations: existingPending };
   }
   
   return { count: recommendations.length, recommendations };

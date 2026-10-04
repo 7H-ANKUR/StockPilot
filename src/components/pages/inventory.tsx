@@ -15,6 +15,8 @@ import {
 } from '@/components/ui/table';
 import { Search, Package, AlertTriangle } from 'lucide-react';
 import { LineChart, Line, ResponsiveContainer, YAxis } from 'recharts';
+import { ProductDetailModal } from '@/components/product-detail-modal';
+import { ExportButton } from '@/components/export-button';
 
 interface InventoryItem {
   productId: string;
@@ -48,6 +50,8 @@ export function InventoryPage() {
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('all');
   const [riskFilter, setRiskFilter] = useState('all');
+  const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
 
   const load = async () => {
     setLoading(true);
@@ -132,14 +136,17 @@ export function InventoryPage() {
 
       {/* Table */}
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Package className="w-4 h-4 text-primary" />
-            Inventory Snapshot
-          </CardTitle>
-          <CardDescription>
-            Showing {filtered.length} of {items.length} SKUs · Latest snapshot per product
-          </CardDescription>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+          <div>
+            <CardTitle className="flex items-center gap-2">
+              <Package className="w-4 h-4 text-primary" />
+              Inventory Snapshot
+            </CardTitle>
+            <CardDescription className="mt-1">
+              Showing {filtered.length} of {items.length} SKUs · Latest snapshot per product
+            </CardDescription>
+          </div>
+          <ExportButton type="inventory" label="Export Inventory (.xlsx)" />
         </CardHeader>
         <CardContent>
           {loading ? (
@@ -165,9 +172,14 @@ export function InventoryPage() {
                 </TableHeader>
                 <TableBody>
                   {filtered.map((item) => (
-                    <TableRow key={item.productId}>
+                    <TableRow 
+                      key={item.productId}
+                      className="cursor-pointer hover:bg-muted/60 transition-colors group"
+                      onClick={() => { setSelectedProductId(item.productId); setModalOpen(true); }}
+                      title="Click for product deep-dive & AI forecast"
+                    >
                       <TableCell>
-                        <div className="font-medium text-sm">{item.name}</div>
+                        <div className="font-medium text-sm group-hover:text-primary transition-colors">{item.name}</div>
                         <div className="text-xs text-muted-foreground">{item.sku}</div>
                       </TableCell>
                       <TableCell>
@@ -238,6 +250,12 @@ export function InventoryPage() {
           )}
         </CardContent>
       </Card>
+
+      <ProductDetailModal
+        productId={selectedProductId}
+        open={modalOpen}
+        onOpenChange={setModalOpen}
+      />
     </div>
   );
 }
