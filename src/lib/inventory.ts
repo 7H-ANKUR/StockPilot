@@ -125,17 +125,50 @@ export async function computeStockoutRisk(
     reason = `Available stock (${availableStock.toFixed(0)}) covers ${(daysOfInventory!).toFixed(1)} days of demand.`;
   }
 
-  // Stockout probability (rough heuristic): increases as coverage ratio drops
-  // When forecast unavailable, probability is unknown (0 = can't assess)
+  // Fetch On Order Stock for ML feature
+  const onOrderLines = await db.purchaseOrderLine.findMany({
+    where: { productId, po: { status: { in: ['DRAFT', 'SENT', 'ACKNOWLEDGED', 'PARTIALLY_FULFILLED'] } } },
+    include: { po: true },
+  });
+  const onOrderStock = onOrderLines.reduce((s, l) => s + l.quantity, 0);
+
+  // Stockout probability using Python ML Model
   let stockoutProbability = 0;
   if (forecastAvailable) {
-    const coverageRatio = requiredCoverage > 0 ? availableStock / requiredCoverage : 1;
-    if (availableStock <= 0) stockoutProbability = 0.99;
-    else if (coverageRatio < 0.5) stockoutProbability = 0.95;
-    else if (coverageRatio < 0.8) stockoutProbability = 0.75;
-    else if (coverageRatio < 1.0) stockoutProbability = 0.45;
-    else if (coverageRatio < 1.5) stockoutProbability = 0.15;
-    else stockoutProbability = 0.03;
+    try {
+      const rolling_demand_7 = forecastDailyDemand * 7;
+      const stock_cover_ratio = availableStock / (rolling_demand_7 + 0.00001);
+      
+      const mlResponse = await fetch('http://localhost:8000/api/v1/predict/stockout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          closing_stock: availableStock,
+          rolling_demand_7: rolling_demand_7,
+          stock_cover_ratio: stock_cover_ratio,
+          on_order_qty: onOrderStock
+        })
+      });
+      if (mlResponse.ok) {
+        const mlData = await mlResponse.json();
+        stockoutProbability = mlData.stockoutRisk || 0;
+        
+        // Enhance risk level based on ML classification if it predicts a stockout
+        if (mlData.willStockout && riskLevel === 'SAFE') {
+            riskLevel = 'WATCH';
+            reason += ' (ML Model indicates hidden stockout risk)';
+        }
+      }
+    } catch (err) {
+      console.error("Failed to reach ML backend for stockout risk, using heuristic", err);
+      const coverageRatio = requiredCoverage > 0 ? availableStock / requiredCoverage : 1;
+      if (availableStock <= 0) stockoutProbability = 0.99;
+      else if (coverageRatio < 0.5) stockoutProbability = 0.95;
+      else if (coverageRatio < 0.8) stockoutProbability = 0.75;
+      else if (coverageRatio < 1.0) stockoutProbability = 0.45;
+      else if (coverageRatio < 1.5) stockoutProbability = 0.15;
+      else stockoutProbability = 0.03;
+    }
   }
 
   return {

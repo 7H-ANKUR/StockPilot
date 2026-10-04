@@ -358,7 +358,7 @@ export async function forecastDemand(
     }
   }
 
-  // Predict using selected model
+  // Predict using selected model (Local TS fallback)
   const { features: latestFeatures, featureNames } = buildFeatures(series, 1);
   let predictedQty: number;
 
@@ -368,6 +368,37 @@ export async function forecastDemand(
     const recent7 = series.slice(-7).map(s => s.qty);
     const mean7 = mean(recent7);
     predictedQty = mean7 * horizonDays;
+  }
+  
+  const featureMap: Record<string, number> = {};
+  featureNames.forEach((name, i) => {
+    featureMap[name] = latestFeatures[i] || 0;
+  });
+
+  // Call Python ML Backend
+  try {
+    const pythonResponse = await fetch('http://localhost:8000/api/v1/predict/demand', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        DayOfWeek: featureMap['weekday'],
+        Month: featureMap['month'],
+        IsWeekend: featureMap['is_weekend'],
+        lag_7: featureMap['lag_7'],
+        lag_14: featureMap['lag_14'],
+        rolling_mean_7: featureMap['rolling_mean_7'],
+        is_festival: 0 // Mocked for simplicity here
+      })
+    });
+    if (pythonResponse.ok) {
+      const pythonData = await pythonResponse.json();
+      if (pythonData && pythonData.predictedQty !== undefined) {
+        predictedQty = pythonData.predictedQty;
+        selectedVariant = 'Python_LightGBM';
+      }
+    }
+  } catch (err) {
+    console.error("Failed to reach Python backend, falling back to local model", err);
   }
 
   // Confidence interval
@@ -421,10 +452,7 @@ export async function forecastDemand(
     },
   }).catch(() => {});
 
-  const featureMap: Record<string, number> = {};
-  featureNames.forEach((name, i) => {
-    featureMap[name] = latestFeatures[i] || 0;
-  });
+  }).catch(() => {});
 
   return {
     productId,

@@ -1,0 +1,285 @@
+[
+    {
+        "filename": "BigBasket Products.csv",
+        "location": "BigBasket Products.csv",
+        "rows": 27555,
+        "columns": 10,
+        "column_names": [
+            "index",
+            "product",
+            "category",
+            "sub_category",
+            "brand",
+            "sale_price",
+            "market_price",
+            "type",
+            "rating",
+            "description"
+        ],
+        "dtypes": {
+            "index": "int64",
+            "product": "str",
+            "category": "str",
+            "sub_category": "str",
+            "brand": "str",
+            "sale_price": "float64",
+            "market_price": "float64",
+            "type": "str",
+            "rating": "float64",
+            "description": "str"
+        },
+        "missing_values": {
+            "index": 0,
+            "product": 1,
+            "category": 0,
+            "sub_category": 0,
+            "brand": 1,
+            "sale_price": 0,
+            "market_price": 0,
+            "type": 0,
+            "rating": 8626,
+            "description": 115
+        },
+        "missing_percentage": 3.17,
+        "duplicates": 0
+    },
+    {
+        "filename": "fmcg dataset.xlsx",
+        "location": "fmcg dataset.xlsx",
+        "rows": 190757,
+        "columns": 14,
+        "column_names": [
+            "date",
+            "sku",
+            "brand",
+            "segment",
+            "category",
+            "channel",
+            "region",
+            "pack_type",
+            "price_unit",
+            "promotion_flag",
+            "delivery_days",
+            "stock_available",
+            "delivered_qty",
+            "units_sold"
+        ],
+        "dtypes": {
+            "date": "datetime64[us]",
+            "sku": "str",
+            "brand": "str",
+            "segment": "str",
+            "category": "str",
+            "channel": "str",
+            "region": "str",
+            "pack_type": "str",
+            "price_unit": "float64",
+            "promotion_flag": "int64",
+            "delivery_days": "int64",
+            "stock_available": "int64",
+            "delivered_qty": "int64",
+            "units_sold": "int64"
+        },
+        "missing_values": {
+            "date": 0,
+            "sku": 0,
+            "brand": 0,
+            "segment": 0,
+            "category": 0,
+            "channel": 0,
+            "region": 0,
+            "pack_type": 0,
+            "price_unit": 0,
+            "promotion_flag": 0,
+            "delivery_days": 0,
+            "stock_available": 0,
+            "delivered_qty": 0,
+            "units_sold": 0
+        },
+        "missing_percentage": 0.0,
+        "duplicates": 0
+    },
+    {
+        "filename": "Supermart Grocery Sales - Retail Analytics Dataset.csv",
+        "location": "Supermart Grocery Sales - Retail Analytics Dataset.csv",
+        "rows": 9994,
+        "columns": 11,
+        "column_names": [
+            "Order ID",
+            "Customer Name",
+            "Category",
+            "Sub Category",
+            "City",
+            "Order Date",
+            "Region",
+            "Sales",
+            "Discount",
+            "Profit",
+            "State"
+        ],
+        "dtypes": {
+            "Order ID": "str",
+            "Customer Name": "str",
+            "Category": "str",
+            "Sub Category": "str",
+            "City": "str",
+            "Order Date": "str",
+            "Region": "str",
+            "Sales": "int64",
+            "Discount": "float64",
+            "Profit": "float64",
+            "State": "str"
+        },
+        "missing_values": {
+            "Order ID": 0,
+            "Customer Name": 0,
+            "Category": 0,
+            "Sub Category": 0,
+            "City": 0,
+            "Order Date": 0,
+            "Region": 0,
+            "Sales": 0,
+            "Discount": 0,
+            "Profit": 0,
+            "State": 0
+        },
+        "missing_percentage": 0.0,
+        "duplicates": 0
+    },
+    {
+        "filename": "superstore-sales-analysis.xlsx",
+        "location": "superstore-sales-analysis.xlsx",
+        "rows": 1,
+        "columns": 5,
+        "column_names": [
+            "Unnamed: 0",
+            "Total Revenue",
+            "Total Profit",
+            "Overall Margin %",
+            "Total Customers"
+        ],
+        "dtypes": {
+            "Unnamed: 0": "float64",
+            "Total Revenue": "int64",
+            "Total Profit": "int64",
+            "Overall Margin %": "float64",
+            "Total Customers": "float64"
+        },
+        "missing_values": {
+            "Unnamed: 0": 1,
+            "Total Revenue": 0,
+            "Total Profit": 0,
+            "Overall Margin %": 0,
+            "Total Customers": 0
+        },
+        "missing_percentage": 20.0,
+        "duplicates": 0
+    },
+    {
+        "filename": "dim_campaigns.csv",
+        "location": "C9_Input_Files\\dataset\\dim_campaigns.csv",
+        "rows": 2,
+        "columns": 4,
+        "column_names": [
+            "campaign_id",
+            "campaign_name",
+            "start_date",
+            "end_date"
+        ],
+        "dtypes": {
+            "campaign_id": "str",
+            "campaign_name": "str",
+            "start_date": "str",
+            "end_date": "str"
+        },
+        "missing_values": {
+            "campaign_id": 0,
+            "campaign_name": 0,
+            "start_date": 0,
+            "end_date": 0
+        },
+        "missing_percentage": 0.0,
+        "duplicates": 0
+    },
+    {
+        "filename": "dim_products.csv",
+        "location": "C9_Input_Files\\dataset\\dim_products.csv",
+        "rows": 15,
+        "columns": 3,
+        "column_names": [
+            "product_code",
+            "product_name",
+            "category"
+        ],
+        "dtypes": {
+            "product_code": "str",
+            "product_name": "str",
+            "category": "str"
+        },
+        "missing_values": {
+            "product_code": 0,
+            "product_name": 0,
+            "category": 0
+        },
+        "missing_percentage": 0.0,
+        "duplicates": 0
+    },
+    {
+        "filename": "dim_stores.csv",
+        "location": "C9_Input_Files\\dataset\\dim_stores.csv",
+        "rows": 50,
+        "columns": 2,
+        "column_names": [
+            "store_id",
+            "city"
+        ],
+        "dtypes": {
+            "store_id": "str",
+            "city": "str"
+        },
+        "missing_values": {
+            "store_id": 0,
+            "city": 0
+        },
+        "missing_percentage": 0.0,
+        "duplicates": 0
+    },
+    {
+        "filename": "fact_events.csv",
+        "location": "C9_Input_Files\\dataset\\fact_events.csv",
+        "rows": 1500,
+        "columns": 8,
+        "column_names": [
+            "event_id",
+            "store_id",
+            "campaign_id",
+            "product_code",
+            "base_price",
+            "promo_type",
+            "quantity_sold(before_promo)",
+            "quantity_sold(after_promo)"
+        ],
+        "dtypes": {
+            "event_id": "str",
+            "store_id": "str",
+            "campaign_id": "str",
+            "product_code": "str",
+            "base_price": "int64",
+            "promo_type": "str",
+            "quantity_sold(before_promo)": "int64",
+            "quantity_sold(after_promo)": "int64"
+        },
+        "missing_values": {
+            "event_id": 0,
+            "store_id": 0,
+            "campaign_id": 0,
+            "product_code": 0,
+            "base_price": 0,
+            "promo_type": 0,
+            "quantity_sold(before_promo)": 0,
+            "quantity_sold(after_promo)": 0
+        },
+        "missing_percentage": 0.0,
+        "duplicates": 0
+    }
+]
