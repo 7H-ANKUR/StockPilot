@@ -648,9 +648,17 @@ export async function runAgent(
   messages.push({ role: 'user', content: userMessage, timestamp: new Date() });
   
   try {
-    // Use ZAI SDK for LLM
-    const ZAI = (await import('z-ai-web-dev-sdk')).default;
-    const zaiClient = await ZAI.create();
+    const callLLM = async (prompt: string, maxTokens: number, temp: number) => {
+      if (!process.env.OPENAI_API_KEY) {
+        return { choices: [{ message: { content: "{ \"thoughts\": \"API key not configured. Mock response.\", \"tool_calls\": [] }" } }] };
+      }
+      const res = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${process.env.OPENAI_API_KEY}` },
+        body: JSON.stringify({ model: "gpt-4o", messages: [{ role: 'user', content: prompt }], temperature: temp, max_tokens: maxTokens })
+      });
+      return res.json();
+    };
     
     // Convert history to chat format
     const chatHistory = [
@@ -692,11 +700,7 @@ Rules:
 - For simple greeting/chitchat, return empty tool_calls array.
 - Maximum 5 tool calls per turn.`;
     
-    const plannerResponse = await zaiClient.chat.completions.create({
-      messages: [{ role: 'user', content: plannerPrompt }],
-      temperature: 0.3,
-      max_tokens: 800,
-    });
+    const plannerResponse = await callLLM(plannerPrompt, 800, 0.3);
     
     const plannerText = plannerResponse.choices[0]?.message?.content || '';
     
@@ -779,11 +783,7 @@ Synthesize a natural-language response for the user based on the tool data. Rule
 7. If user asked to create a PO but no APPROVED recommendations exist, tell them they need to approve recommendations first via the Recommendations page.
 8. Keep response concise but informative — typically 100-400 words.`;
       
-      const synthResponse = await zaiClient.chat.completions.create({
-        messages: [{ role: 'user', content: synthesisPrompt }],
-        temperature: 0.5,
-        max_tokens: 800,
-      });
+      const synthResponse = await callLLM(synthesisPrompt, 800, 0.5);
       
       finalResponse = synthResponse.choices[0]?.message?.content || 'I processed your request but could not generate a response.';
     }

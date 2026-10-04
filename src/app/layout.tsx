@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   keywords: ["AI", "inventory", "agent", "retail", "India", "forecasting", "PO"],
   authors: [{ name: "AI Inventory Decision Agent" }],
   icons: {
-    icon: "https://z-cdn.chatglm.cn/z-ai/static/logo.svg",
+    icon: "/icon.svg",
   },
 };
 

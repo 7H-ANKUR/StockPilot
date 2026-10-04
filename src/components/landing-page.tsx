@@ -75,20 +75,21 @@ export function LandingPage({ onEnterDashboard, bootstrapping }: LandingPageProp
         .lp-nav-links .cta:hover { background: var(--green); color: #fff; }
         .lp-hero {
           max-width: 1240px; margin: 0 auto; padding: 56px 28px 42px;
-          display: grid; grid-template-columns: .86fr 1.14fr; gap: 48px; align-items: center;
+          display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center;
         }
+        .lp-hero > div { min-width: 0; }
         .lp-eyebrow {
           display: inline-flex; gap: 9px; align-items: center; padding: 8px 12px; border-radius: 999px;
           background: #dff4e7; border: 1px solid #caead7; color: #08743a; font-size: 12px; font-weight: 800;
           letter-spacing: .04em; text-transform: uppercase;
         }
         .lp-hero h1 {
-          font-size: 64px; line-height: 1.02; letter-spacing: -.05em; margin: 18px 0 18px; max-width: 650px;
+          font-size: clamp(42px, 4.5vw, 64px); line-height: 1.05; letter-spacing: -.03em; margin: 18px 0 18px; max-width: 650px;
           font-weight: 800;
         }
         .lp-hero h1 span { color: var(--green); }
         .lp-lead {
-          font-size: 19px; line-height: 1.6; color: #607067; max-width: 600px; margin: 0 0 28px;
+          font-size: clamp(16px, 1.5vw, 19px); line-height: 1.6; color: #607067; max-width: 600px; margin: 0 0 28px;
         }
         .lp-hero-actions { display: flex; gap: 12px; align-items: center; margin-bottom: 25px; flex-wrap: wrap; }
         .lp-primary, .lp-secondary {
@@ -102,13 +103,13 @@ export function LandingPage({ onEnterDashboard, bootstrapping }: LandingPageProp
         .lp-secondary:hover { border-color: var(--green); color: var(--green); }
         .lp-proof { font-size: 13px; color: #738178; }
         .lp-proof strong { color: #173025; }
-        .lp-visual-wrap { position: relative; min-height: 585px; display: flex; align-items: center; justify-content: center; }
+        .lp-visual-wrap { position: relative; min-height: 585px; display: flex; align-items: center; justify-content: center; width: 100%; }
         .lp-halo {
-          position: absolute; width: 590px; height: 590px; border-radius: 50%;
+          position: absolute; width: 100%; max-width: 590px; aspect-ratio: 1; border-radius: 50%;
           background: radial-gradient(circle,#dcf6e7 0%,#effaf3 50%,rgba(239,250,243,0) 72%);
         }
         .lp-dashboard-shell {
-          position: relative; z-index: 2; width: min(640px, 100%);
+          position: relative; z-index: 2; width: 100%; max-width: 640px;
           border: 1px solid #d9e6dd; border-radius: 28px;
           background: #fff; box-shadow: var(--shadow); overflow: hidden;
           transform: rotate(-1.1deg);

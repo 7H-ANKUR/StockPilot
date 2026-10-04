@@ -137,13 +137,12 @@ export async function ingestSupermartCSV(
     const skuBase = `${category}|${subCategory}`.replace(/\s+/g, '_').toUpperCase();
     if (!productMap.has(skuBase)) {
       const productId = uuid();
-      productMap.set(skuBase, productId);
       
       // Estimate unit price from avg sales (assume quantity=1 for first sale)
       const sellingPrice = Math.round(sales * (1 - discount) * 0.95);
       const gstRate = getGstRateForCategory(category);
       
-      await db.product.upsert({
+      const dbProduct = await db.product.upsert({
         where: {
           tenantId_sku: {
             tenantId: DEFAULT_TENANT_ID,
@@ -167,6 +166,7 @@ export async function ingestSupermartCSV(
           isActive: true,
         },
       });
+      productMap.set(skuBase, dbProduct.id);
     }
     
     const productId = productMap.get(skuBase)!;
@@ -375,10 +375,9 @@ export async function ingestSuperstoreXLSX(
     const skuBase = `SS-${category}-${subCategory}`.replace(/\s+/g, '_').toUpperCase();
     if (!productMap.has(skuBase)) {
       const productId = uuid();
-      productMap.set(skuBase, productId);
       const gstRate = getGstRateForCategory(category);
       
-      await db.product.upsert({
+      const dbProduct = await db.product.upsert({
         where: { tenantId_sku: { tenantId: DEFAULT_TENANT_ID, sku: skuBase } },
         update: {},
         create: {
@@ -397,6 +396,7 @@ export async function ingestSuperstoreXLSX(
           isActive: true,
         },
       });
+      productMap.set(skuBase, dbProduct.id);
     }
     
     const productId = productMap.get(skuBase)!;

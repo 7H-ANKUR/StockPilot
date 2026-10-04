@@ -2,9 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { ensureBootstrap, ingestSupermartCSV, ingestBigBasketCSV, ingestSuperstoreXLSX, seedSuppliersAndInventory } from '@/lib/ingestion';
 
-const SUPERMART_PATH = '/home/z/my-project/upload/extracted_1/Supermart Grocery Sales - Retail Analytics Dataset.csv';
-const BIGBASKET_PATH = '/home/z/my-project/upload/extracted_2/BigBasket Products.csv';
-const SUPERSTORE_PATH = '/home/z/my-project/upload/superstore-sales-analysis.xlsx';
+import path from 'path';
+
+const SUPERMART_PATH = path.join(process.cwd(), 'upload', 'extracted_1', 'Supermart Grocery Sales - Retail Analytics Dataset.csv');
+const BIGBASKET_PATH = path.join(process.cwd(), 'upload', 'extracted_2', 'BigBasket Products.csv');
+const SUPERSTORE_PATH = path.join(process.cwd(), 'upload', 'superstore-sales-analysis.xlsx');
 
 export async function POST(req: NextRequest) {
   try {
