@@ -21,6 +21,7 @@ import {
   TrendingUp, CheckCircle2, ShieldAlert, Sparkles, Filter, Eye, Layers, BarChart2
 } from 'lucide-react';
 import { LineChart, Line, ResponsiveContainer, YAxis, Tooltip, AreaChart, Area, XAxis } from 'recharts';
+import { ExportButton } from '@/components/export-button';
 
 interface BrandItem {
   name: string;
@@ -135,6 +136,8 @@ export function InventoryPage() {
   const [productSearch, setProductSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [riskFilter, setRiskFilter] = useState('all');
+  const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
 
   // Step 3: Product details modal
   const [selectedProduct, setSelectedProduct] = useState<InventoryItem | null>(null);
@@ -608,7 +611,7 @@ export function InventoryPage() {
       {/* STEP 3 — Product Table (Preserving and enhancing all existing fields) */}
       <Card>
         <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
               <CardTitle className="flex items-center gap-2 text-base">
                 <Package className="w-4 h-4 text-primary" />
@@ -618,8 +621,11 @@ export function InventoryPage() {
                 Showing {filteredProducts.length} of {items.length} products strictly belonging to {selectedBrand}
               </CardDescription>
             </div>
-            <div className="text-xs text-muted-foreground italic hidden sm:block">
-              Click any product row for detailed inventory & demand breakdown
+            <div className="flex items-center gap-3">
+              <div className="text-xs text-muted-foreground italic hidden md:block">
+                Click any row for detailed breakdown
+              </div>
+              <ExportButton type="inventory" label="Export Inventory (.xlsx)" />
             </div>
           </div>
         </CardHeader>

@@ -16,15 +16,20 @@ datasource db {
 // ============================================================
 
 model Tenant {
-  id          String   @id @default(cuid())
-  name        String
-  code        String   @unique
-  gstin       String?
-  createdAt   DateTime @default(now())
-  users       User[]
-  stores      Store[]
-  products    Product[]
-  suppliers   Supplier[]
+  id           String   @id @default(cuid())
+  name         String
+  code         String   @unique
+  gstin        String?
+  address      String?
+  phone        String?
+  email        String?
+  currency     String   @default("INR")
+  settingsJson String?
+  createdAt    DateTime @default(now())
+  users        User[]
+  stores       Store[]
+  products     Product[]
+  suppliers    Supplier[]
 }
 
 model User {
@@ -33,6 +38,8 @@ model User {
   name         String
   passwordHash String
   role         String   @default("ANALYST") // ADMIN, OWNER, MANAGER, PROCUREMENT, FINANCE, ANALYST
+  isActive     Boolean  @default(true)
+  phone        String?
   tenantId     String
   tenant       Tenant   @relation(fields: [tenantId], references: [id])
   approvals    Approval[]
@@ -58,6 +65,9 @@ model Store {
   sales        Sale[]
   purchaseOrders PurchaseOrder[]
   forecasts    Forecast[]
+  transfersFrom InventoryTransfer[] @relation("TransfersFrom")
+  transfersTo   InventoryTransfer[] @relation("TransfersTo")
+  batches       InventoryBatch[]
 
   @@unique([tenantId, code])
 }
@@ -75,6 +85,8 @@ model Product {
   gstRate       Float    @default(0)
   mrp           Float    @default(0)
   sellingPrice  Float    @default(0)
+  shelfLifeDays Int?
+  isPerishable  Boolean  @default(false)
   isActive      Boolean  @default(true)
   sourceDataset String?
   createdAt     DateTime @default(now())
@@ -84,6 +96,8 @@ model Product {
   recommendations Recommendation[]
   poLines       PurchaseOrderLine[]
   supplierProducts SupplierProduct[]
+  batches       InventoryBatch[]
+  transferLines TransferLine[]
 
   @@unique([tenantId, sku])
 }
@@ -372,3 +386,82 @@ model DataQualityRun {
   issuesJson   String?
   createdAt    DateTime @default(now())
 }
+
+// ============================================================
+// NOTIFICATIONS & ALERTS
+// ============================================================
+
+model Notification {
+  id           String   @id @default(cuid())
+  tenantId     String
+  userId       String?  // null = broadcast to all users in tenant
+  type         String   // STOCKOUT_ALERT, PO_STATUS, FORECAST_ANOMALY, EXPIRY_WARNING, SYSTEM
+  title        String
+  message      String
+  severity     String   @default("INFO") // INFO, WARNING, CRITICAL
+  isRead       Boolean  @default(false)
+  resourceType String?  // PRODUCT, PURCHASE_ORDER, RECOMMENDATION, etc.
+  resourceId   String?
+  createdAt    DateTime @default(now())
+
+  @@index([tenantId, userId, isRead])
+}
+
+// ============================================================
+// TRANSFERS & MULTI-STORE
+// ============================================================
+
+model InventoryTransfer {
+  id             String         @id @default(cuid())
+  tenantId       String
+  transferNumber String         @unique
+  fromStoreId    String
+  fromStore      Store          @relation("TransfersFrom", fields: [fromStoreId], references: [id])
+  toStoreId      String
+  toStore        Store          @relation("TransfersTo", fields: [toStoreId], references: [id])
+  status         String         @default("DRAFT") // DRAFT, PENDING_APPROVAL, IN_TRANSIT, COMPLETED, CANCELLED
+  requestedBy    String?
+  approvedBy     String?
+  requestDate    DateTime       @default(now())
+  completedDate  DateTime?
+  notes          String?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  lines          TransferLine[]
+
+  @@index([tenantId, status])
+}
+
+model TransferLine {
+  id         String            @id @default(cuid())
+  transferId String
+  transfer   InventoryTransfer @relation(fields: [transferId], references: [id], onDelete: Cascade)
+  productId  String
+  product    Product           @relation(fields: [productId], references: [id])
+  quantity   Float
+  reason     String?           // OVERSTOCK_RELIEF, STOCKOUT_PREVENTION, REBALANCE
+}
+
+// ============================================================
+// BATCHES & SHELF-LIFE EXPIRY
+// ============================================================
+
+model InventoryBatch {
+  id              String    @id @default(cuid())
+  tenantId        String
+  storeId         String
+  store           Store     @relation(fields: [storeId], references: [id])
+  productId       String
+  product         Product   @relation(fields: [productId], references: [id])
+  batchNumber     String
+  quantity        Float
+  costPrice       Float     @default(0)
+  manufactureDate DateTime?
+  expiryDate      DateTime
+  status          String    @default("ACTIVE") // ACTIVE, EXPIRING_SOON, EXPIRED, CONSUMED, WRITTEN_OFF
+  createdAt       DateTime  @default(now())
+
+  @@index([tenantId, storeId, productId])
+  @@index([expiryDate])
+}
+

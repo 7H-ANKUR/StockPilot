@@ -9,6 +9,7 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table';
 import { Receipt, IndianRupee, TrendingUp, TrendingDown } from 'lucide-react';
+import { ExportButton } from '@/components/export-button';
 
 export function GstPage() {
   const [data, setData] = useState<any | null>(null);
@@ -36,15 +37,18 @@ export function GstPage() {
   return (
     <div className="space-y-4">
       <Card className="bg-gradient-card-info border-info/20">
-        <CardContent className="py-4 flex items-start gap-3">
-          <Receipt className="w-5 h-5 text-info mt-0.5" />
-          <div className="flex-1">
-            <h3 className="font-medium">GST Module — AI-Assisted Reporting</h3>
-            <p className="text-sm text-muted-foreground mt-1">
-              Calculates CGST/SGST/IGST for sales (output tax) and purchases (input tax).
-              This is an AI-assisted reporting layer, not a replacement for professional tax filing software.
-            </p>
+        <CardContent className="py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-start gap-3">
+            <Receipt className="w-5 h-5 text-info mt-0.5 shrink-0" />
+            <div>
+              <h3 className="font-medium">GST Module — AI-Assisted Reporting</h3>
+              <p className="text-sm text-muted-foreground mt-1">
+                Calculates CGST/SGST/IGST for sales (output tax) and purchases (input tax).
+                This is an AI-assisted reporting layer, not a replacement for professional tax filing software.
+              </p>
+            </div>
           </div>
+          <ExportButton type="gst" label="Export GSTR Report (.xlsx)" />
         </CardContent>
       </Card>
 

@@ -11,6 +11,8 @@ import {
   Calendar,
   Truck,
   ShoppingCart,
+  ArrowRightLeft,
+  CalendarClock,
   BarChart3,
   Receipt,
   FileClock,
@@ -20,8 +22,11 @@ import {
   Menu,
   X,
   Bell,
+  Users,
+  Settings,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { NotificationsPopover } from '@/components/notifications-popover';
 import type { PageKey } from '@/app/page';
 
 interface NavItem {
@@ -42,11 +47,15 @@ const NAV: NavItem[] = [
   { key: 'festivals', label: 'Festivals', icon: Calendar, group: 'ops' },
   { key: 'suppliers', label: 'Suppliers', icon: Truck, group: 'ops' },
   { key: 'purchase-orders', label: 'Purchase Orders', icon: ShoppingCart, group: 'ops' },
+  { key: 'transfers', label: 'Stock Transfers', icon: ArrowRightLeft, group: 'ops' },
+  { key: 'expiry', label: 'Expiry & Batches', icon: CalendarClock, group: 'ops' },
   { key: 'analytics', label: 'Analytics', icon: BarChart3, group: 'ops' },
   { key: 'gst', label: 'GST Module', icon: Receipt, group: 'ops' },
   { key: 'audit', label: 'Audit Logs', icon: FileClock, group: 'system' },
   { key: 'models', label: 'Model Health', icon: Brain, group: 'system' },
   { key: 'data', label: 'Data Sources', icon: Database, group: 'system' },
+  { key: 'users', label: 'Team & Access', icon: Users, group: 'system' },
+  { key: 'settings', label: 'Settings', icon: Settings, group: 'system' },
 ];
 
 const GROUPS: { id: NavItem['group']; label: string }[] = [
@@ -172,10 +181,7 @@ export function AppShell({
             <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse-soft" />
             System Online
           </div>
-          <button className="p-2 hover:bg-muted rounded-md relative">
-            <Bell className="w-4 h-4" />
-            <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-destructive" />
-          </button>
+          <NotificationsPopover onNavigate={onPageChange} />
         </header>
 
         {/* Page content */}
