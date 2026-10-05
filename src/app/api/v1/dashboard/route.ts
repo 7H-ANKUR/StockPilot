@@ -73,15 +73,28 @@ export async function GET() {
     LIMIT 6
   `);
 
-  const stockoutRiskItems = topRiskRaw.map((r: any) => ({
-    productId: r.productId,
-    sku: r.sku,
-    productName: r.productName,
-    currentStock: Number(r.currentStock || 0),
-    reorderPoint: Number(r.reorderPoint || 15),
-    riskLevel: Number(r.currentStock || 0) <= 0 ? 'CRITICAL' : 'HIGH',
-    stockoutProbability: Number(r.currentStock || 0) <= 0 ? 0.99 : 0.85,
-  }));
+  const stockoutRiskItems = topRiskRaw.map((r: any) => {
+    const currentStock = Number(r.currentStock || 0);
+    const reorderPoint = Number(r.reorderPoint || 15);
+    const leadTimeDemand = Math.max(1, Math.round(reorderPoint * 0.7 * 10) / 10);
+    const expectedDaysToStockout = currentStock <= 0 ? 0 : Math.max(1, Math.round(currentStock / Math.max(1, leadTimeDemand / 5)));
+    const riskLevel = currentStock <= 0 ? 'CRITICAL' : currentStock <= 5 ? 'HIGH' : 'MEDIUM';
+    const stockoutProbability = currentStock <= 0 ? 0.99 : currentStock <= 5 ? 0.88 : 0.65;
+
+    return {
+      productId: r.productId,
+      sku: r.sku,
+      productName: r.productName,
+      brand: r.brand,
+      currentStock,
+      availableStock: currentStock,
+      reorderPoint,
+      leadTimeDemand,
+      expectedDaysToStockout,
+      riskLevel,
+      stockoutProbability,
+    };
+  });
 
 
   // Pending approvals

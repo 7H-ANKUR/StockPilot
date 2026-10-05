@@ -270,11 +270,11 @@ export function DashboardPage({ onNavigate }: { onNavigate: (p: PageKey) => void
                     <div className="flex-1 min-w-0">
                       <div className="text-sm font-medium truncate">{r.productName}</div>
                       <div className="text-xs text-muted-foreground tabular-nums">
-                        Stock: {r.availableStock.toFixed(0)} · Lead-time demand: {r.leadTimeDemand.toFixed(1)} · Days: {r.expectedDaysToStockout}
+                        Stock: {Number(r.availableStock ?? r.currentStock ?? 0).toFixed(0)} · Lead-time demand: {Number(r.leadTimeDemand ?? 0).toFixed(1)} · Days: {r.expectedDaysToStockout ?? 0}
                       </div>
                     </div>
                     <div className="text-sm font-semibold tabular-nums text-destructive">
-                      {(r.stockoutProbability * 100).toFixed(0)}%
+                      {(Number(r.stockoutProbability ?? 0) * 100).toFixed(0)}%
                     </div>
                   </div>
                 ))
@@ -326,7 +326,7 @@ export function DashboardPage({ onNavigate }: { onNavigate: (p: PageKey) => void
                       </div>
                     </div>
                     <Badge variant="outline" className="text-xs">
-                      {(f.importance * 100).toFixed(0)}%
+                      {((Number(f.importance ?? 1)) * 100).toFixed(0)}%
                     </Badge>
                   </div>
                 ))}
