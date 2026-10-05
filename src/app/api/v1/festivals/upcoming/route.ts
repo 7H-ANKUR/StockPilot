@@ -8,7 +8,8 @@ export async function GET() {
   
   const festivals = await db.festival.findMany({
     where: {
-      startDate: { gte: today, lte: next90 },
+      endDate: { gte: today },
+      startDate: { lte: next90 },
     },
     orderBy: { startDate: 'asc' },
   });

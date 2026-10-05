@@ -12,6 +12,7 @@ import { db } from '@/lib/db';
 import { v4 as uuid } from 'uuid';
 import * as fs from 'fs';
 import * as XLSX from 'xlsx';
+import { seedIndianFestivals } from '@/lib/festivals';
 
 export interface IngestionResult {
   source: string;
@@ -365,7 +366,15 @@ export async function ingestSuperstoreXLSX(
     const amountNum = parseFloat(amount);
     const profitNum = parseFloat(profit);
     const quantityNum = parseFloat(quantity);
-    const date = new Date(orderDate);
+    
+    // Parse order date: support Excel serial numbers (e.g. 43414) as well as date strings
+    let date: Date;
+    const serial = parseFloat(orderDate);
+    if (!isNaN(serial) && serial > 30000 && serial < 60000) {
+      date = new Date(Math.round((serial - 25569) * 86400 * 1000));
+    } else {
+      date = new Date(orderDate);
+    }
     
     if (isNaN(amountNum) || amountNum < 0 || isNaN(date.getTime())) {
       quarantinedRows++;
@@ -488,37 +497,8 @@ export async function seedSuppliersAndInventory() {
     });
   }
   
-  // Festival calendar (India)
-  const festivalsData = [
-    { name: 'Diwali', eventType: 'CULTURAL', startDate: '2025-10-21', endDate: '2025-10-25', region: 'ALL_INDIA', importance: 1.0, categories: 'Sweets,Snacks,Gifts,Decoratives' },
-    { name: 'Holi', eventType: 'CULTURAL', startDate: '2026-03-14', endDate: '2026-03-15', region: 'NORTH_INDIA', importance: 0.8, categories: 'Colors,Sweets, Beverages' },
-    { name: 'Eid al-Fitr', eventType: 'CULTURAL', startDate: '2026-03-31', endDate: '2026-04-02', region: 'ALL_INDIA', importance: 0.85, categories: 'Sweets,Dry Fruits,Gifts' },
-    { name: 'Raksha Bandhan', eventType: 'CULTURAL', startDate: '2026-08-19', endDate: '2026-08-19', region: 'ALL_INDIA', importance: 0.7, categories: 'Sweets,Gifts,Decoratives' },
-    { name: 'Navratri', eventType: 'CULTURAL', startDate: '2026-09-26', endDate: '2026-10-04', region: 'WEST_INDIA', importance: 0.75, categories: 'Snacks,Fasting Items' },
-    { name: 'Dussehra', eventType: 'CULTURAL', startDate: '2026-10-05', endDate: '2026-10-05', region: 'ALL_INDIA', importance: 0.8, categories: 'Sweets,Decoratives' },
-    { name: 'Christmas', eventType: 'CULTURAL', startDate: '2025-12-24', endDate: '2025-12-26', region: 'ALL_INDIA', importance: 0.7, categories: 'Sweets,Decoratives,Gifts,Beverages' },
-    { name: 'Pongal', eventType: 'CULTURAL', startDate: '2026-01-14', endDate: '2026-01-17', region: 'SOUTH_INDIA', importance: 0.7, categories: 'Rice,Sweets' },
-    { name: 'Onam', eventType: 'CULTURAL', startDate: '2026-08-28', endDate: '2026-09-08', region: 'SOUTH_INDIA', importance: 0.65, categories: 'Sweets,Snacks,Decoratives' },
-    { name: 'Independence Day', eventType: 'NATIONAL', startDate: '2025-08-15', endDate: '2025-08-15', region: 'ALL_INDIA', importance: 0.4, categories: 'All' },
-    { name: 'Republic Day', eventType: 'NATIONAL', startDate: '2026-01-26', endDate: '2026-01-26', region: 'ALL_INDIA', importance: 0.4, categories: 'All' },
-  ];
-  
-  for (const f of festivalsData) {
-    const existing = await db.festival.findFirst({ where: { name: f.name } });
-    if (!existing) {
-      await db.festival.create({
-        data: {
-          name: f.name,
-          eventType: f.eventType,
-          startDate: new Date(f.startDate),
-          endDate: new Date(f.endDate),
-          region: f.region,
-          importance: f.importance,
-          categories: f.categories,
-        },
-      });
-    }
-  }
+  // Festival calendar (India) - verified multi-year lunisolar dates
+  await seedIndianFestivals();
   
   // Build supplier-product mappings + inventory snapshots
   const products = await db.product.findMany({ take: 1000 });

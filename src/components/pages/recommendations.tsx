@@ -40,6 +40,7 @@ export function RecommendationsPage() {
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [filter, setFilter] = useState('all');
+  const [serverStats, setServerStats] = useState<{ pending: number; approved: number; rejected: number; poGenerated: number } | null>(null);
   const [modifyTarget, setModifyTarget] = useState<Recommendation | null>(null);
   const [modifyQty, setModifyQty] = useState(0);
   const [modifyComment, setModifyComment] = useState('');
@@ -51,6 +52,9 @@ export function RecommendationsPage() {
     const res = await fetch(`/api/v1/recommendations${params}`);
     const data = await res.json();
     setRecs(data.recommendations || []);
+    if (data.stats) {
+      setServerStats(data.stats);
+    }
     setLoading(false);
   };
 
@@ -127,7 +131,7 @@ export function RecommendationsPage() {
 
   const fmtINR = (n: number) => `₹${n.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`;
 
-  const stats = {
+  const stats = serverStats || {
     pending: recs.filter(r => r.status === 'PENDING_REVIEW').length,
     approved: recs.filter(r => r.status === 'APPROVED' || r.status === 'MODIFIED').length,
     rejected: recs.filter(r => r.status === 'REJECTED').length,

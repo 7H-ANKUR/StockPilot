@@ -17,6 +17,11 @@ import { GstPage } from '@/components/pages/gst';
 import { AuditPage } from '@/components/pages/audit';
 import { ModelHealthPage } from '@/components/pages/model-health';
 import { DataSourcePage } from '@/components/pages/data-source';
+import { SettingsPage } from '@/components/pages/settings';
+import { UserManagementPage } from '@/components/pages/user-management';
+import { TransfersPage } from '@/components/pages/transfers';
+import { ExpiryTrackingPage } from '@/components/pages/expiry-tracking';
+import { ProductDetailModal } from '@/components/product-detail-modal';
 import { useToast } from '@/hooks/use-toast';
 
 export type PageKey =
@@ -29,14 +34,19 @@ export type PageKey =
   | 'festivals'
   | 'suppliers'
   | 'purchase-orders'
+  | 'transfers'
+  | 'expiry'
   | 'analytics'
   | 'gst'
   | 'audit'
   | 'models'
-  | 'data';
+  | 'data'
+  | 'users'
+  | 'settings';
 
 export default function HomePage() {
   const [page, setPage] = useState<PageKey>('dashboard');
+  const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
   // `entered` gates the landing page — always starts false on a fresh page load,
   // so the user always sees the landing page first. Only flips to true when they
   // click "Explore the platform".
@@ -105,11 +115,23 @@ export default function HomePage() {
       {page === 'festivals' && <FestivalsPage />}
       {page === 'suppliers' && <SuppliersPage />}
       {page === 'purchase-orders' && <PurchaseOrdersPage />}
+      {page === 'transfers' && <TransfersPage onSelectProduct={setSelectedProductId} />}
+      {page === 'expiry' && <ExpiryTrackingPage onSelectProduct={setSelectedProductId} />}
       {page === 'analytics' && <AnalyticsPage />}
       {page === 'gst' && <GstPage />}
       {page === 'audit' && <AuditPage />}
       {page === 'models' && <ModelHealthPage />}
       {page === 'data' && <DataSourcePage />}
+      {page === 'users' && <UserManagementPage />}
+      {page === 'settings' && <SettingsPage />}
+
+      {selectedProductId && (
+        <ProductDetailModal
+          productId={selectedProductId}
+          isOpen={!!selectedProductId}
+          onClose={() => setSelectedProductId(null)}
+        />
+      )}
     </AppShell>
   );
 }

@@ -27,7 +27,7 @@ export function FestivalsPage() {
         if (d.festivals?.length > 0) setSelectedFestival(d.festivals[0].name);
       })
       .finally(() => setLoading(false));
-    fetch('/api/v1/products?limit=200')
+    fetch('/api/v1/products?limit=250&withSalesFirst=true')
       .then(r => r.json())
       .then(d => {
         setProducts(d.products || []);
@@ -135,8 +135,8 @@ export function FestivalsPage() {
                 value={selectedFestival}
                 onChange={(e) => setSelectedFestival(e.target.value)}
               >
-                {festivals.map(f => (
-                  <option key={f.id} value={f.name}>{f.name}</option>
+                {Array.from(new Set(festivals.map(f => f.name))).map(name => (
+                  <option key={name} value={name}>{name}</option>
                 ))}
               </select>
               <label className="text-xs text-muted-foreground mt-2">Product</label>
@@ -146,7 +146,9 @@ export function FestivalsPage() {
                 onChange={(e) => setSelectedProduct(e.target.value)}
               >
                 {products.map(p => (
-                  <option key={p.id} value={p.id}>{p.name} ({p.sku})</option>
+                  <option key={p.id} value={p.id}>
+                    {p.hasSales ? '★ ' : ''}{p.name} ({p.sku}){p.hasSales ? ' [POS Sales]' : ''}
+                  </option>
                 ))}
               </select>
             </div>
@@ -164,29 +166,51 @@ export function FestivalsPage() {
             </Button>
 
             {analysis && (
-              <div className="space-y-3 pt-2 border-t">
-                <div className="p-3 rounded-md bg-primary/5 border border-primary/20">
-                  <div className="text-xs text-muted-foreground">Expected Uplift</div>
-                  <div className="text-3xl font-bold tabular-nums">
-                    {analysis.expectedUplift > 0 ? '+' : ''}{(analysis.expectedUplift * 100).toFixed(0)}%
+              <div className="space-y-3.5 pt-3 border-t border-border/60">
+                {/* Original Uplift Card */}
+                <div className="p-4 rounded-xl border border-emerald-500/30 bg-gradient-to-br from-emerald-950/20 via-background to-background relative overflow-hidden shadow-sm">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5" />
+                      Festive Demand Uplift
+                    </span>
+                    <Badge variant="outline" className="bg-emerald-500/15 text-emerald-400 border-emerald-500/30 text-[10px] font-semibold">
+                      {analysis.expectedUplift >= 0.35 ? 'High Surge' : analysis.expectedUplift >= 0.20 ? 'Moderate Surge' : 'Baseline Footfall'}
+                    </Badge>
+                  </div>
+                  
+                  <div className="mt-2 flex items-baseline gap-2">
+                    <span className="text-4xl font-extrabold tracking-tight text-emerald-400 tabular-nums">
+                      +{Math.max(0, Math.round(analysis.expectedUplift * 100))}%
+                    </span>
+                    <span className="text-xs text-muted-foreground font-medium">
+                      surge over standard baseline
+                    </span>
                   </div>
                 </div>
-                <div className="grid grid-cols-3 gap-2 text-xs">
-                  <div className="p-2 rounded bg-muted/50">
-                    <div className="text-muted-foreground">Forecast Units</div>
-                    <div className="font-semibold tabular-nums">{analysis.forecastUnits}</div>
+
+                {/* Key Metrics Grid */}
+                <div className="grid grid-cols-3 gap-2.5 text-xs">
+                  <div className="p-2.5 rounded-xl bg-card/60 border border-border/60">
+                    <div className="text-[11px] text-muted-foreground font-medium">Forecast Units</div>
+                    <div className="text-base font-bold text-foreground mt-0.5 tabular-nums">{analysis.forecastUnits}</div>
                   </div>
-                  <div className="p-2 rounded bg-muted/50">
-                    <div className="text-muted-foreground">Confidence</div>
-                    <div className="font-semibold tabular-nums">{(analysis.confidence * 100).toFixed(0)}%</div>
+                  <div className="p-2.5 rounded-xl bg-card/60 border border-border/60">
+                    <div className="text-[11px] text-muted-foreground font-medium">Model Confidence</div>
+                    <div className="text-base font-bold text-foreground mt-0.5 tabular-nums">{(analysis.confidence * 100).toFixed(0)}%</div>
                   </div>
-                  <div className="p-2 rounded bg-muted/50">
-                    <div className="text-muted-foreground">Evidence Days</div>
-                    <div className="font-semibold tabular-nums">{analysis.evidenceDays}</div>
+                  <div className="p-2.5 rounded-xl bg-card/60 border border-border/60">
+                    <div className="text-[11px] text-muted-foreground font-medium">Evidence Days</div>
+                    <div className="text-base font-bold text-foreground mt-0.5 tabular-nums">{analysis.evidenceDays}d</div>
                   </div>
                 </div>
-                <div className="text-xs text-muted-foreground leading-relaxed p-2 rounded bg-muted/30">
-                  <strong className="text-foreground">Reason:</strong> {analysis.reason}
+
+                {/* AI Rationale Box */}
+                <div className="text-xs text-muted-foreground leading-relaxed p-3 rounded-xl bg-card/60 border border-border/60">
+                  <div className="font-semibold text-foreground mb-1 flex items-center gap-1.5 text-xs">
+                    <span>Retail Intelligence Rationale</span>
+                  </div>
+                  <p className="text-[11px] text-muted-foreground/90">{analysis.reason}</p>
                 </div>
               </div>
             )}
