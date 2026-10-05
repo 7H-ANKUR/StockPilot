@@ -121,7 +121,7 @@ export const TOOLS: Record<string, ToolDef> = {
         return true;
       });
       
-      const results = [];
+      const results: any[] = [];
       for (const inv of unique.slice(0, limit)) {
         const risk = await computeStockoutRisk(inv.productId, DEFAULT_STORE_ID);
         if (args.riskFilter && risk.riskLevel !== args.riskFilter) continue;
@@ -201,7 +201,7 @@ export const TOOLS: Record<string, ToolDef> = {
         return true;
       });
       
-      const risks = [];
+      const risks: any[] = [];
       for (const inv of unique.slice(0, 100)) {
         const risk = await computeStockoutRisk(inv.productId, DEFAULT_STORE_ID);
         if (risk.riskLevel === 'HIGH' || risk.riskLevel === 'CRITICAL') {
@@ -240,7 +240,7 @@ export const TOOLS: Record<string, ToolDef> = {
         return true;
       });
       
-      const overstocks = [];
+      const overstocks: any[] = [];
       for (const inv of unique.slice(0, 100)) {
         const info = await computeOverstock(inv.productId, DEFAULT_STORE_ID);
         if (info.isOverstock) {
@@ -280,7 +280,7 @@ export const TOOLS: Record<string, ToolDef> = {
         return true;
       });
       
-      const items = [];
+      const items: any[] = [];
       for (const inv of unique) {
         const series = await getDailySalesSeries(inv.productId, DEFAULT_STORE_ID, 28);
         const avgDaily = series.slice(-7).reduce((s, x) => s + x.qty, 0) / 7;
@@ -462,7 +462,7 @@ export const TOOLS: Record<string, ToolDef> = {
       // Calculate totals
       let subtotal = 0;
       let taxAmount = 0;
-      const lines = [];
+      const lines: any[] = [];
 
       for (const rec of approvedRecs) {
         const supplierProduct = await db.supplierProduct.findFirst({
@@ -605,7 +605,7 @@ export interface ToolCall {
   args: Record<string, any>;
 }
 
-const SYSTEM_PROMPT = `You are the AI Inventory Decision Agent — an intelligence layer for Indian retail inventory management.
+const SYSTEM_PROMPT = `You are StockPilot — an intelligence layer for Indian retail inventory management.
 
 CRITICAL RULES (NEVER VIOLATE):
 1. ALL numbers MUST come from tool calls. Never invent sales, inventory, forecasts, prices, MOQ, lead times, or GST values.

@@ -94,7 +94,7 @@ export async function PATCH(
     return NextResponse.json({ user: updated });
   } catch (e: any) {
     if (e instanceof z.ZodError) {
-      return NextResponse.json({ error: e.errors[0]?.message || 'Validation error' }, { status: 400 });
+      return NextResponse.json({ error: e.issues?.[0]?.message || 'Validation error' }, { status: 400 });
     }
     return NextResponse.json({ error: e.message }, { status: 500 });
   }
@@ -126,7 +126,7 @@ export async function DELETE(
     }
 
     // Check if user has associated audit logs or approvals
-    const approvalsCount = await db.approval.count({ where: { decidedBy: id } });
+    const approvalsCount = await db.approval.count({ where: { userId: id } });
     if (approvalsCount > 0) {
       // Soft-delete / deactivate instead
       const deactivated = await db.user.update({

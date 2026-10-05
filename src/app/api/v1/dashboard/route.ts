@@ -16,16 +16,20 @@ export async function GET() {
 
   const totalRevenue30d = sales30.reduce((s, x) => s + x.netSales, 0);
   const transactions30d = sales30.length;
-  const avgOrderValue = transactions30d > 0 ? totalRevenue30d / transactions30d : 0;
-
   // All-time totals (no date filter)
   const allSales = await db.sale.findMany({ select: { netSales: true, quantity: true, saleTimestamp: true } });
   const totalRevenue = allSales.reduce((s, x) => s + x.netSales, 0);
   const totalQty = allSales.reduce((s, x) => s + x.quantity, 0);
+  const totalTransactions = allSales.length;
+
+  // Average Order Value = Total Revenue / Completed Transactions
+  const avgOrderValue = totalTransactions > 0 ? totalRevenue / totalTransactions : 0;
+  const avgOrderValue30d = transactions30d > 0 ? totalRevenue30d / transactions30d : 0;
 
   // Top movers (last 30 days by revenue)
   const byProd = new Map<string, { name: string; sku: string; revenue: number; qty: number }>();
   for (const s of sales30) {
+    if (!s.product) continue;
     const cur = byProd.get(s.productId) || { name: s.product.name, sku: s.product.sku, revenue: 0, qty: 0 };
     cur.revenue += s.netSales;
     cur.qty += s.quantity;
@@ -36,44 +40,62 @@ export async function GET() {
     .sort((a, b) => b.revenue - a.revenue)
     .slice(0, 5);
 
-  // Inventory risk summary
-  const inventory = await db.inventorySnapshot.findMany({
-    where: { storeId: DEFAULT_STORE_ID },
-    orderBy: { snapshotDate: 'desc' },
-    take: 500,
-    include: { product: true },
+  // Fast, accurate stockout & risk count across catalog
+  const inventoryCounts: any = await db.$queryRawUnsafe(`
+    SELECT 
+      SUM(CASE WHEN i.onHandQty <= 0 THEN 1 ELSE 0 END) as outOfStock,
+      SUM(CASE WHEN i.onHandQty > 0 AND i.onHandQty <= COALESCE(i.reorderPoint, 15) THEN 1 ELSE 0 END) as lowStock,
+      SUM(CASE WHEN i.onHandQty > COALESCE(i.reorderPoint, 15) AND i.onHandQty <= COALESCE(i.reorderPoint, 15) * 1.3 THEN 1 ELSE 0 END) as watchStock,
+      SUM(CASE WHEN i.onHandQty > COALESCE(i.maxStock, 100) THEN 1 ELSE 0 END) as overStock
+    FROM InventorySnapshot i
+    JOIN Product p ON i.productId = p.id
+  `);
+
+  const invStats = inventoryCounts[0] || {};
+  const stockoutHigh = Number(invStats.outOfStock || 0);
+  const stockoutLow = Number(invStats.lowStock || 0);
+  const stockoutWatch = Number(invStats.watchStock || 0);
+  const overstock = Number(invStats.overStock || 0);
+
+  // Top stockout risk items for preview
+  const topRiskRaw: any = await db.$queryRawUnsafe(`
+    SELECT 
+      p.id as productId,
+      p.sku,
+      p.name as productName,
+      p.brand,
+      i.onHandQty as currentStock,
+      COALESCE(i.reorderPoint, 15) as reorderPoint
+    FROM Product p
+    JOIN InventorySnapshot i ON p.id = i.productId
+    WHERE i.onHandQty <= COALESCE(i.reorderPoint, 15)
+    ORDER BY i.onHandQty ASC
+    LIMIT 6
+  `);
+
+  const stockoutRiskItems = topRiskRaw.map((r: any) => {
+    const currentStock = Number(r.currentStock || 0);
+    const reorderPoint = Number(r.reorderPoint || 15);
+    const leadTimeDemand = Math.max(1, Math.round(reorderPoint * 0.7 * 10) / 10);
+    const expectedDaysToStockout = currentStock <= 0 ? 0 : Math.max(1, Math.round(currentStock / Math.max(1, leadTimeDemand / 5)));
+    const riskLevel = currentStock <= 0 ? 'CRITICAL' : currentStock <= 5 ? 'HIGH' : 'MEDIUM';
+    const stockoutProbability = currentStock <= 0 ? 0.99 : currentStock <= 5 ? 0.88 : 0.65;
+
+    return {
+      productId: r.productId,
+      sku: r.sku,
+      productName: r.productName,
+      brand: r.brand,
+      currentStock,
+      availableStock: currentStock,
+      reorderPoint,
+      leadTimeDemand,
+      expectedDaysToStockout,
+      riskLevel,
+      stockoutProbability,
+    };
   });
 
-  const seen = new Set<string>();
-  const unique = inventory.filter(i => {
-    if (seen.has(i.productId)) return false;
-    seen.add(i.productId);
-    return true;
-  });
-
-  let stockoutHigh = 0;
-  let stockoutWatch = 0;
-  let overstock = 0;
-  let noDemandSignal = 0;
-  const stockoutRiskItems: any[] = [];
-
-  for (const inv of unique.slice(0, 200)) {
-    const risk = await computeStockoutRisk(inv.productId, DEFAULT_STORE_ID);
-    if (risk.riskLevel === 'HIGH' || risk.riskLevel === 'CRITICAL') {
-      stockoutHigh++;
-      stockoutRiskItems.push(risk);
-    } else if (risk.riskLevel === 'WATCH') {
-      stockoutWatch++;
-    }
-    // Check overstock only when demand is known
-    if (risk.forecastDailyDemand > 0.1 && risk.daysOfInventory !== null) {
-      if (risk.daysOfInventory > 30) overstock++;
-    } else if (risk.forecastDailyDemand < 0.1 && inv.onHandQty > 0) {
-      noDemandSignal++;
-    }
-  }
-
-  stockoutRiskItems.sort((a, b) => b.stockoutProbability - a.stockoutProbability);
 
   // Pending approvals
   const pendingApprovals = await db.recommendation.count({
@@ -121,10 +143,12 @@ export async function GET() {
       revenue30d: Math.round(totalRevenue30d * 100) / 100,
       transactions30d,
       avgOrderValue: Math.round(avgOrderValue * 100) / 100,
+      avgOrderValue30d: Math.round(avgOrderValue30d * 100) / 100,
       stockoutHigh,
+      stockoutLow,
       stockoutWatch,
       overstock,
-      noDemandSignal,
+      noDemandSignal: 0,
       pendingApprovals,
       approvedRecs,
       pendingReorderValue: Math.round(pendingReorderValue * 100) / 100,

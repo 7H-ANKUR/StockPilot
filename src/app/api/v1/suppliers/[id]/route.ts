@@ -72,7 +72,7 @@ export async function PATCH(
     return NextResponse.json({ supplier: updated });
   } catch (e: any) {
     if (e instanceof z.ZodError) {
-      return NextResponse.json({ error: e.errors[0]?.message || 'Validation error' }, { status: 400 });
+      return NextResponse.json({ error: e.issues?.[0]?.message || 'Validation error' }, { status: 400 });
     }
     return NextResponse.json({ error: e.message }, { status: 500 });
   }

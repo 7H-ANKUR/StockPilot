@@ -146,7 +146,7 @@ export function TransfersPage({ onSelectProduct }: { onSelectProduct?: (productI
     setTransferNotes(`AI Rebalance recommendation for ${sug.productName}`);
     setTransferLines([{
       productId: sug.productId,
-      productName: `${sug.name || sug.productName} (${sug.sku})`,
+      productName: `${sug.productName} (${sug.sku})`,
       quantity: sug.suggestedQty,
       reason: sug.reason,
     }]);

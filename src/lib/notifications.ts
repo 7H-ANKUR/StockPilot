@@ -93,7 +93,7 @@ export async function generateInitialNotifications(tenantId: string) {
       type: 'PO_STATUS',
       severity: 'WARNING',
       title: `Reorder Required: ${rec.product.name}`,
-      message: `Suggested order of ${rec.suggestedQty} units (est. ₹${rec.estimatedCost.toLocaleString('en-IN')}) requires review.`,
+      message: `Suggested order of ${rec.recommendedQty} units (est. ₹${(rec.estimatedCost ?? 0).toLocaleString('en-IN')}) requires review.`,
       resourceType: 'RECOMMENDATION',
       resourceId: rec.id,
     });

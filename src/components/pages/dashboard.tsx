@@ -16,6 +16,7 @@ import {
 } from 'recharts';
 import type { PageKey } from '@/app/page';
 import { useToast } from '@/hooks/use-toast';
+import { DashboardDrilldownModal, DrilldownMetric } from '@/components/dashboard-drilldown';
 
 interface DashboardData {
   kpis: {
@@ -25,7 +26,9 @@ interface DashboardData {
     revenue30d: number;
     transactions30d: number;
     avgOrderValue: number;
+    avgOrderValue30d?: number;
     stockoutHigh: number;
+    stockoutLow?: number;
     stockoutWatch: number;
     overstock: number;
     noDemandSignal: number;
@@ -53,6 +56,7 @@ export function DashboardPage({ onNavigate }: { onNavigate: (p: PageKey) => void
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
+  const [drilldownMetric, setDrilldownMetric] = useState<DrilldownMetric | null>(null);
   const { toast } = useToast();
 
   const load = async () => {
@@ -118,31 +122,35 @@ export function DashboardPage({ onNavigate }: { onNavigate: (p: PageKey) => void
         <KpiCard
           title="Total Revenue"
           value={fmtINR(k.totalRevenue)}
-          subtitle={`₹${(k.revenue30d / 1000).toFixed(1)}K in last 30 days`}
+          subtitle={k.revenue30d > 0 ? `${fmtINR(k.revenue30d)} in last 30 days` : 'Across all store sales'}
           icon={<IndianRupee className="w-5 h-5" />}
           gradient="bg-gradient-card-success"
+          onClick={() => setDrilldownMetric('revenue')}
         />
         <KpiCard
           title="Transactions"
           value={k.totalTransactions.toLocaleString()}
-          subtitle={`${k.transactions30d} in last 30 days`}
+          subtitle={k.transactions30d > 0 ? `${k.transactions30d.toLocaleString()} in last 30 days` : 'Completed sales'}
           icon={<ShoppingCart className="w-5 h-5" />}
           gradient="bg-gradient-card-info"
+          onClick={() => setDrilldownMetric('transactions')}
         />
         <KpiCard
           title="Avg Order Value"
           value={fmtINR(k.avgOrderValue)}
-          subtitle="Across all transactions"
+          subtitle="Per completed transaction"
           icon={<TrendingUp className="w-5 h-5" />}
           gradient="bg-gradient-card-success"
+          onClick={() => setDrilldownMetric('aov')}
         />
         <KpiCard
           title="Stockout Alerts"
           value={String(k.stockoutHigh)}
-          subtitle={`${k.stockoutWatch} items on watch · ${k.overstock} overstock`}
+          subtitle={`${k.stockoutHigh} critical · ${k.stockoutLow || 0} low stock`}
           icon={<AlertTriangle className="w-5 h-5" />}
           gradient="bg-gradient-card-danger"
           alert={k.stockoutHigh > 0}
+          onClick={() => setDrilldownMetric('stockouts')}
         />
       </div>
 
@@ -262,11 +270,11 @@ export function DashboardPage({ onNavigate }: { onNavigate: (p: PageKey) => void
                     <div className="flex-1 min-w-0">
                       <div className="text-sm font-medium truncate">{r.productName}</div>
                       <div className="text-xs text-muted-foreground tabular-nums">
-                        Stock: {r.availableStock.toFixed(0)} · Lead-time demand: {r.leadTimeDemand.toFixed(1)} · Days: {r.expectedDaysToStockout}
+                        Stock: {Number(r.availableStock ?? r.currentStock ?? 0).toFixed(0)} · Lead-time demand: {Number(r.leadTimeDemand ?? 0).toFixed(1)} · Days: {r.expectedDaysToStockout ?? 0}
                       </div>
                     </div>
                     <div className="text-sm font-semibold tabular-nums text-destructive">
-                      {(r.stockoutProbability * 100).toFixed(0)}%
+                      {(Number(r.stockoutProbability ?? 0) * 100).toFixed(0)}%
                     </div>
                   </div>
                 ))
@@ -318,7 +326,7 @@ export function DashboardPage({ onNavigate }: { onNavigate: (p: PageKey) => void
                       </div>
                     </div>
                     <Badge variant="outline" className="text-xs">
-                      {(f.importance * 100).toFixed(0)}%
+                      {((Number(f.importance ?? 1)) * 100).toFixed(0)}%
                     </Badge>
                   </div>
                 ))}
@@ -473,12 +481,20 @@ export function DashboardPage({ onNavigate }: { onNavigate: (p: PageKey) => void
           </CardContent>
         </Card>
       </div>
+
+      {/* Interactive KPI Drilldown Modal */}
+      <DashboardDrilldownModal
+        open={drilldownMetric !== null}
+        onClose={() => setDrilldownMetric(null)}
+        metric={drilldownMetric || 'transactions'}
+        onMetricChange={setDrilldownMetric}
+      />
     </div>
   );
 }
 
 function KpiCard({
-  title, value, subtitle, icon, gradient, alert,
+  title, value, subtitle, icon, gradient, alert, onClick,
 }: {
   title: string;
   value: string;
@@ -486,21 +502,41 @@ function KpiCard({
   icon: React.ReactNode;
   gradient?: string;
   alert?: boolean;
+  onClick?: () => void;
 }) {
   return (
-    <Card className={`${gradient || ''} border-border`}>
+    <Card
+      onClick={onClick}
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onKeyDown={(e) => {
+        if (onClick && (e.key === 'Enter' || e.key === ' ')) {
+          e.preventDefault();
+          onClick();
+        }
+      }}
+      className={`group relative ${gradient || ''} border-border transition-all duration-200 ${
+        onClick ? 'cursor-pointer hover:border-primary/60 hover:shadow-md' : ''
+      }`}
+    >
       <CardContent className="pt-5">
         <div className="flex items-start justify-between">
           <div>
             <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{title}</div>
-            <div className="text-2xl font-bold mt-1 tabular-nums">{value}</div>
+            <div className="text-2xl font-bold mt-1 tabular-nums group-hover:text-primary transition-colors">{value}</div>
           </div>
-          <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${alert ? 'bg-destructive/15 text-destructive' : 'bg-primary/15 text-primary'}`}>
+          <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${alert ? 'bg-destructive/15 text-destructive' : 'bg-primary/15 text-primary'} group-hover:scale-110 transition-transform`}>
             {icon}
           </div>
         </div>
         {subtitle && (
           <div className="text-xs text-muted-foreground mt-2">{subtitle}</div>
+        )}
+        {onClick && (
+          <div className="mt-2.5 pt-2 border-t border-border/40 text-[11px] text-primary/80 font-medium flex items-center gap-1 group-hover:text-primary transition-colors">
+            <span>Click for details</span>
+            <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+          </div>
         )}
       </CardContent>
     </Card>

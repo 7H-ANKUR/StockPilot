@@ -100,7 +100,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ supplier }, { status: 201 });
   } catch (e: any) {
     if (e instanceof z.ZodError) {
-      return NextResponse.json({ error: e.errors[0]?.message || 'Validation error' }, { status: 400 });
+      return NextResponse.json({ error: e.issues?.[0]?.message || 'Validation error' }, { status: 400 });
     }
     return NextResponse.json({ error: e.message }, { status: 500 });
   }

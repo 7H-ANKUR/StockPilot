@@ -575,7 +575,7 @@ export async function seedSuppliersAndInventory() {
   return {
     products: products.length,
     suppliers: suppliers.length,
-    festivals: festivalsData.length,
+    festivals: await db.festival.count(),
     supplierProducts: supplierProductsCreated,
     inventorySnapshots: inventoryCreated,
   };

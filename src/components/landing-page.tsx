@@ -91,7 +91,20 @@ export function LandingPage({ onEnterDashboard, bootstrapping }: LandingPageProp
         .lp-lead {
           font-size: clamp(16px, 1.5vw, 19px); line-height: 1.6; color: #607067; max-width: 600px; margin: 0 0 28px;
         }
-        .lp-hero-actions { display: flex; gap: 12px; align-items: center; margin-bottom: 25px; flex-wrap: wrap; }
+        .lp-hero-actions { display: flex; flex-direction: column; gap: 12px; margin-bottom: 25px; max-width: 480px; width: 100%; }
+        .lp-hero-secondary-row { display: flex; gap: 10px; width: 100%; }
+        .lp-hero-secondary-row .lp-secondary {
+          flex: 1; padding: 11px 16px; font-size: 13px; border-radius: 12px;
+          text-align: center; text-decoration: none; display: inline-flex; align-items: center; justify-content: center;
+          white-space: nowrap; gap: 6px;
+        }
+        .lp-hero-main-cta {
+          width: 100%; padding: 16px 28px; font-size: 16px; font-weight: 800; border-radius: 14px;
+          text-align: center; justify-content: center; letter-spacing: -.01em;
+        }
+        @media (max-width: 520px) {
+          .lp-hero-secondary-row { flex-direction: column; }
+        }
         .lp-primary, .lp-secondary {
           display: inline-flex; align-items: center; justify-content: center; gap: 9px;
           padding: 14px 19px; border-radius: 14px; font-size: 14px; font-weight: 800; cursor: pointer;
@@ -225,8 +238,22 @@ export function LandingPage({ onEnterDashboard, bootstrapping }: LandingPageProp
 
       <header className="lp-nav">
         <div className="lp-brand">
-          <div className="lp-brand-mark">⌂</div>
-          AI Inventory Decision Agent
+          <div className="lp-brand-mark">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              style={{ width: '18px', height: '18px' }}
+            >
+              <path d="M22 2L11 13" />
+              <path d="M22 2l-7 20-4-9-9-4 20-7z" />
+            </svg>
+          </div>
+          StockPilot
         </div>
         <nav className="lp-nav-links">
           <a href="#how">How it works</a>
@@ -247,10 +274,30 @@ export function LandingPage({ onEnterDashboard, bootstrapping }: LandingPageProp
               supplier-ready purchase orders — with manager approval.
             </p>
             <div className="lp-hero-actions">
-              <button className="lp-primary" onClick={handleEnter} disabled={bootstrapping}>
+              <div className="lp-hero-secondary-row">
+                <button
+                  className="lp-secondary"
+                  onClick={() => {
+                    const demoEl = document.querySelector('.lp-visual-wrap') || document.getElementById('demo');
+                    demoEl?.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                >
+                  <span style={{ fontSize: '11px', lineHeight: 1 }}>▶</span> Watch Demo Video
+                </button>
+                <a
+                  className="lp-secondary"
+                  href="#how"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    document.getElementById('how')?.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                >
+                  See How It Works
+                </a>
+              </div>
+              <button className="lp-primary lp-hero-main-cta" onClick={handleEnter} disabled={bootstrapping}>
                 {bootstrapping ? 'Loading demo data…' : 'Explore the platform →'}
               </button>
-              <a className="lp-secondary" href="#how">See how it works</a>
             </div>
             <div className="lp-proof">
               <strong>Forecasting · Risk Intelligence · Festival Planning · Supplier-aware Reordering</strong>
@@ -275,7 +322,7 @@ export function LandingPage({ onEnterDashboard, bootstrapping }: LandingPageProp
               </div>
               <div className="lp-dash-main">
                 <aside className="lp-side">
-                  <div className="lp-side-brand">AI Inventory</div>
+                  <div className="lp-side-brand">StockPilot</div>
                   <div className="lp-side-item active">Dashboard</div>
                   <div className="lp-side-item">Inventory</div>
                   <div className="lp-side-item">Forecasting</div>
@@ -385,7 +432,7 @@ export function LandingPage({ onEnterDashboard, bootstrapping }: LandingPageProp
       </main>
 
       <footer className="lp-footer">
-        AI Inventory Decision Agent · Agentic AI for Indian Retail · Intelligence layer, not POS replacement.
+        StockPilot · Agentic AI for Indian Retail · Intelligence layer, not POS replacement.
       </footer>
 
       {view === 'demo-loading' && bootstrapping && (

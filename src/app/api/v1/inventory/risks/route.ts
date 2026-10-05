@@ -19,8 +19,8 @@ export async function GET() {
     return true;
   });
   
-  const stockoutRisks = [];
-  const overstockRisks = [];
+  const stockoutRisks: any[] = [];
+  const overstockRisks: any[] = [];
   
   for (const inv of unique.slice(0, 200)) {
     const risk = await computeStockoutRisk(inv.productId, DEFAULT_STORE_ID);

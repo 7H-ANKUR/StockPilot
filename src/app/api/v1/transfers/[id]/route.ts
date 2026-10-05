@@ -122,8 +122,7 @@ export async function PATCH(
         }
 
         // Send notification
-        await createNotification({
-          tenantId: user.tenantId,
+        await createNotification(user.tenantId, {
           type: 'STOCKOUT_ALERT',
           title: `Transfer ${existing.transferNumber} Completed`,
           message: `${existing.lines.length} items successfully transferred from ${existing.fromStore.name} to ${existing.toStore.name}.`,
