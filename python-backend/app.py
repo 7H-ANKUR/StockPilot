@@ -16,6 +16,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.get("/")
+@app.get("/health")
+def health():
+    return {
+        "status": "healthy",
+        "forecasting_model_loaded": forecast_model is not None,
+        "stockout_model_loaded": stockout_model is not None,
+    }
+
 # Load Models (lazy load in endpoints to ensure they exist, but global for perf)
 forecast_model = None
 stockout_model = None
