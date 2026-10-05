@@ -10,17 +10,26 @@ app = FastAPI(title="StockPilot ML API")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
+    allow_origins=[
+        "*",
+        "https://stockpilot-5ajkmzteo-naitikgupta140191s-projects.vercel.app",
+        "http://localhost:3000",
+        "http://localhost:3001",
+    ],
+    allow_origin_regex=r"https://.*\.vercel\.app",
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 @app.get("/")
 @app.get("/health")
+@app.get("/api/v1/health")
 def health():
     return {
         "status": "healthy",
+        "service": "StockPilot ML Backend",
+        "version": "1.0.0",
         "forecasting_model_loaded": forecast_model is not None,
         "stockout_model_loaded": stockout_model is not None,
     }

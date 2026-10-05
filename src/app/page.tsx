@@ -23,6 +23,7 @@ import { TransfersPage } from '@/components/pages/transfers';
 import { ExpiryTrackingPage } from '@/components/pages/expiry-tracking';
 import { ProductDetailModal } from '@/components/product-detail-modal';
 import { useToast } from '@/hooks/use-toast';
+import { apiUrl } from '@/lib/api-config';
 
 export type PageKey =
   | 'dashboard'
@@ -57,7 +58,7 @@ export default function HomePage() {
   // Check if data is already loaded (so we can skip ingestion on "Explore")
   const checkData = useCallback(async () => {
     try {
-      const res = await fetch('/api/v1/health');
+      const res = await fetch(apiUrl('/api/v1/health'));
       const data = await res.json();
       return !!(data.database && data.database.products > 0);
     } catch {
@@ -71,7 +72,7 @@ export default function HomePage() {
     const alreadyLoaded = await checkData();
     if (!alreadyLoaded) {
       try {
-        const res = await fetch('/api/v1/data/import', {
+        const res = await fetch(apiUrl('/api/v1/data/import'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ source: 'ALL' }),
