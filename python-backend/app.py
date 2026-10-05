@@ -29,13 +29,29 @@ def health():
 forecast_model = None
 stockout_model = None
 
+def resolve_model_path(*subpaths):
+    candidates = [
+        os.path.join(os.path.dirname(__file__), "..", *subpaths),
+        os.path.join(os.path.dirname(__file__), *subpaths),
+        os.path.join(os.getcwd(), *subpaths),
+        os.path.join(os.getcwd(), "..", *subpaths),
+    ]
+    for p in candidates:
+        if os.path.exists(p):
+            return p
+    return os.path.join("..", *subpaths)
+
 try:
-    forecast_model = joblib.load(os.path.join("..", "ml", "forecasting", "best_forecasting_model.joblib"))
+    fc_path = resolve_model_path("ml", "forecasting", "best_forecasting_model.joblib")
+    forecast_model = joblib.load(fc_path)
+    print(f"Loaded forecasting model from {fc_path}")
 except Exception as e:
     print(f"Warning: Forecasting model not found at startup: {e}")
 
 try:
-    stockout_model = joblib.load(os.path.join("..", "ml", "stockout", "best_stockout_model.joblib"))
+    so_path = resolve_model_path("ml", "stockout", "best_stockout_model.joblib")
+    stockout_model = joblib.load(so_path)
+    print(f"Loaded stockout model from {so_path}")
 except Exception as e:
     print(f"Warning: Stockout model not found at startup: {e}")
 
