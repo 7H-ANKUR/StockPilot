@@ -238,8 +238,22 @@ export function LandingPage({ onEnterDashboard, bootstrapping }: LandingPageProp
 
       <header className="lp-nav">
         <div className="lp-brand">
-          <div className="lp-brand-mark">⌂</div>
-          AI Inventory Decision Agent
+          <div className="lp-brand-mark">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              style={{ width: '18px', height: '18px' }}
+            >
+              <path d="M22 2L11 13" />
+              <path d="M22 2l-7 20-4-9-9-4 20-7z" />
+            </svg>
+          </div>
+          StockPilot
         </div>
         <nav className="lp-nav-links">
           <a href="#how">How it works</a>
@@ -308,7 +322,7 @@ export function LandingPage({ onEnterDashboard, bootstrapping }: LandingPageProp
               </div>
               <div className="lp-dash-main">
                 <aside className="lp-side">
-                  <div className="lp-side-brand">AI Inventory</div>
+                  <div className="lp-side-brand">StockPilot</div>
                   <div className="lp-side-item active">Dashboard</div>
                   <div className="lp-side-item">Inventory</div>
                   <div className="lp-side-item">Forecasting</div>
@@ -418,7 +432,7 @@ export function LandingPage({ onEnterDashboard, bootstrapping }: LandingPageProp
       </main>
 
       <footer className="lp-footer">
-        AI Inventory Decision Agent · Agentic AI for Indian Retail · Intelligence layer, not POS replacement.
+        StockPilot · Agentic AI for Indian Retail · Intelligence layer, not POS replacement.
       </footer>
 
       {view === 'demo-loading' && bootstrapping && (

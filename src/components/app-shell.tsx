@@ -91,12 +91,24 @@ export function AppShell({
       >
         {/* Logo */}
         <div className="h-16 flex items-center gap-3 px-5 border-b border-sidebar-border">
-          <div className="w-9 h-9 rounded-lg bg-sidebar-primary flex items-center justify-center">
-            <Store className="w-5 h-5 text-sidebar-primary-foreground" />
+          <div className="w-9 h-9 rounded-lg bg-sidebar-primary flex items-center justify-center shadow-md">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="w-5 h-5 text-sidebar-primary-foreground"
+            >
+              <path d="M22 2L11 13" />
+              <path d="M22 2l-7 20-4-9-9-4 20-7z" />
+            </svg>
           </div>
           <div>
-            <div className="font-semibold text-sm leading-tight">AI Inventory</div>
-            <div className="text-xs text-sidebar-foreground/60 leading-tight">Decision Agent</div>
+            <div className="font-bold text-base leading-tight tracking-tight">StockPilot</div>
+            <div className="text-[10px] uppercase tracking-widest text-sidebar-foreground/60 leading-tight mt-0.5">Decision Agent</div>
           </div>
           <button
             className="ml-auto lg:hidden text-sidebar-foreground/70"

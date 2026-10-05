@@ -10,10 +10,10 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "AI Inventory Decision Agent",
+  title: "StockPilot | AI Inventory Decision Agent",
   description: "Agentic AI inventory intelligence platform for Indian retail — forecasting, stockout prediction, festival-aware reorders, manager-approved purchase orders.",
-  keywords: ["AI", "inventory", "agent", "retail", "India", "forecasting", "PO"],
-  authors: [{ name: "AI Inventory Decision Agent" }],
+  keywords: ["AI", "inventory", "agent", "retail", "India", "forecasting", "PO", "StockPilot"],
+  authors: [{ name: "StockPilot" }],
   icons: {
     icon: "/icon.svg",
   },

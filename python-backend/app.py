@@ -6,7 +6,7 @@ import numpy as np
 import os
 from fastapi.middleware.cors import CORSMiddleware
 
-app = FastAPI(title="AI Inventory ML API")
+app = FastAPI(title="StockPilot ML API")
 
 app.add_middleware(
     CORSMiddleware,

@@ -29,7 +29,7 @@ export function AgentChatPage() {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'assistant',
-      content: "Hi! I'm the AI Inventory Decision Agent. I can help you analyze inventory, forecast demand, identify stockout risks, calculate reorder quantities, and prepare purchase orders — all grounded in your real retail data.\n\nTry asking me something like \"What should I reorder today?\" or \"Which items are at risk of stocking out?\"",
+      content: "Hi! I'm StockPilot. I can help you analyze inventory, forecast demand, identify stockout risks, calculate reorder quantities, and prepare purchase orders — all grounded in your real retail data.\n\nTry asking me something like \"What should I reorder today?\" or \"Which items are at risk of stocking out?\"",
       timestamp: new Date().toISOString(),
     },
   ]);
@@ -98,7 +98,7 @@ export function AgentChatPage() {
             <Brain className="w-6 h-6 text-primary-foreground" />
           </div>
           <div className="flex-1">
-            <h2 className="font-semibold">AI Inventory Agent</h2>
+            <h2 className="font-semibold">StockPilot Agent</h2>
             <p className="text-sm text-muted-foreground">
               Tool-calling LLM agent — 12 tools, structured JSON outputs, no hallucinated numbers.
               The LLM orchestrates; deterministic services own the math.
