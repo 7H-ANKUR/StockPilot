@@ -381,7 +381,11 @@ export async function forecastDemand(
 
   // Call Python ML Backend
   try {
-    const pythonBaseUrl = process.env.PYTHON_BACKEND_URL || 'http://localhost:8000';
+    const pythonBaseUrl =
+      process.env.PYTHON_BACKEND_URL ||
+      process.env.VITE_API_URL ||
+      process.env.NEXT_PUBLIC_API_URL ||
+      'http://localhost:8000';
     const pythonResponse = await fetch(`${pythonBaseUrl}/api/v1/predict/demand`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { apiUrl } from '@/lib/api-config';
 
 interface LandingPageProps {
   onEnterDashboard: () => void;
@@ -13,7 +14,7 @@ export function LandingPage({ onEnterDashboard, bootstrapping }: LandingPageProp
 
   // Pull live summary from backend if data exists (for the trust strip)
   useEffect(() => {
-    fetch('/api/v1/health')
+    fetch(apiUrl('/api/v1/health'))
       .then(r => r.json())
       .then(d => {
         if (d.database && d.database.products > 0) {

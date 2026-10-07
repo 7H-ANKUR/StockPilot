@@ -139,7 +139,11 @@ export async function computeStockoutRisk(
       const rolling_demand_7 = forecastDailyDemand * 7;
       const stock_cover_ratio = availableStock / (rolling_demand_7 + 0.00001);
       
-      const pythonBaseUrl = process.env.PYTHON_BACKEND_URL || 'http://localhost:8000';
+      const pythonBaseUrl =
+        process.env.PYTHON_BACKEND_URL ||
+        process.env.VITE_API_URL ||
+        process.env.NEXT_PUBLIC_API_URL ||
+        'http://localhost:8000';
       const mlResponse = await fetch(`${pythonBaseUrl}/api/v1/predict/stockout`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
